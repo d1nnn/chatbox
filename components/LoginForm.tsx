@@ -6,11 +6,19 @@ import FormSubmitButton from './FormSubmitButton'
 import firebaseApi from '../configs/firebaseConfig'
 import useLogin from '../hooks/useLogin'
 import { NavigationProp } from '../props/Navigation'
+// import {
+//   StyleSheet,
+//   Text,
+//   View,
+//   Dimensions,
+//   NativeSyntheticEvent,
+//   TextInputChangeEventData,
+// } from "react-native";
 
 type LoginInfo = {
-  username: string,
-  password: string,
-}
+  username: string;
+  password: string;
+};
 
 
 
@@ -45,7 +53,7 @@ export default function LoginForm({ navigation }: NavigationProp): React.JSX.Ele
 
 const styles = StyleSheet.create({
   form: {
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start'
-  }
-})
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+  },
+});

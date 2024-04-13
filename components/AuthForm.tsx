@@ -3,7 +3,18 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import { Dimensions, ScrollView, TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { NavigationProp } from "../props/Navigation";
+// import { RootParamList } from "../navigators/MainNavigator";
+// import FormSubmitButton from "./FormSubmitButton";
+// import {
+//   Dimensions,
+//   ScrollView,
+//   TouchableOpacity,
+//   View,
+//   Text,
+//   StyleSheet,
+// } from "react-native";
 
+// type ScreenProps = StackScreenProps<RootParamList>;
 
 
 const { width, height } = Dimensions.get('window')
@@ -20,7 +31,6 @@ export default function AuthForm({ navigation }: NavigationProp): React.JSX.Elem
         </View>
 
         <View style={styles.selector}>
-
           <TouchableOpacity
             style={{ ...styles.selectorBtn, ...styles.loginBtn }}
             onPress={() => scrollView.current?.scrollTo({ x: 0 })}
@@ -54,7 +64,7 @@ export default function AuthForm({ navigation }: NavigationProp): React.JSX.Elem
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
+    height: "100%",
     marginTop: height / 10,
   },
   loginBtn: {
@@ -68,28 +78,27 @@ const styles = StyleSheet.create({
   },
   selectorBtn: {
     borderWidth: 1,
-    padding: 10
+    padding: 10,
   },
   selectorText: {
-    fontSize: 20
+    fontSize: 20,
   },
   selector: {
-    flexDirection: 'row',
-    alignSelf: 'center',
+    flexDirection: "row",
+    alignSelf: "center",
   },
-  formView: {
-  },
+  formView: {},
   titleContainer: {
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 50,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   slogan: {
     fontSize: 20,
   },
-})
+});

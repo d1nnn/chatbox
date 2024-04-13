@@ -56,7 +56,7 @@ export default function FloatButton({ position, translate, navigation }: FloatBu
   return (
 
     <View style={[styles.floatBtnContainer, { [position]: position === "right" ? 10 : 30, flexDirection: position === "right" ? 'row' : 'column' }]}>
-      <TouchableWithoutFeedback onPress={() => { navigation?.navigate("About"); }}>
+      <TouchableWithoutFeedback onPress={() => { navigation?.navigate("ChatScreen"); }}>
         <Animated.View
           style={[
             styles.button,

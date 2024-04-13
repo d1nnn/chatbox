@@ -7,5 +7,6 @@ export default function Login({ navigation, route }: NavigationProp): React.JSX.
     <>
       <AuthForm navigation={navigation} route={route} />
     </>
-  )
+  );
 }
+

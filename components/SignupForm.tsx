@@ -10,12 +10,11 @@ import { UserAction } from '../constants/user'
 import { NavigationProp } from '../props/Navigation'
 
 type RegisterInfo = {
-  username: string,
-  displayName: string,
-  password: string,
-  confirmPassword: string,
-}
-
+  username: string;
+  displayName: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export default function SignupForm({ navigation }: NavigationProp): React.JSX.Element {
   const { state, dispatch } = useLogin()
@@ -24,8 +23,7 @@ export default function SignupForm({ navigation }: NavigationProp): React.JSX.El
     displayName: "",
     password: "",
     confirmPassword: "",
-  })
-
+  });
 
   const handleSignup = async () => {
     firebaseApi.createUserWithEmailAndPassword(firebaseApi.auth, userInfo.username, userInfo.password).then((res) => {
@@ -60,4 +58,3 @@ export default function SignupForm({ navigation }: NavigationProp): React.JSX.El
     </FormContainer>
   )
 }
-

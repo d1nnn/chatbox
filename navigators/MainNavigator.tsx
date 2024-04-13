@@ -8,6 +8,7 @@ import Loading from "../screens/Loading";
 import Welcome from "../screens/Welcome";
 import LatestMessage from "../screens/LatestMessage";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import ChatScreen from "../screens/ChatScreen";
 
 
 export type RootParamList = {
@@ -16,8 +17,10 @@ export type RootParamList = {
   Auth: undefined
   Welcome: undefined
   LatestMessage: undefined
+  ChatScreen: undefined;
 }
 const Stack = createStackNavigator<RootParamList>()
+
 
 
 const StackNavigator = (): React.JSX.Element => {
@@ -28,7 +31,7 @@ const StackNavigator = (): React.JSX.Element => {
         state.data ?
           <>
             <Stack.Screen component={DrawerNavigator} name="Home"></Stack.Screen>
-            <Stack.Screen component={About} name="About"></Stack.Screen>
+            <Stack.Screen component={ChatScreen} name="ChatScreen"></Stack.Screen>
           </>
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>
@@ -36,8 +39,8 @@ const StackNavigator = (): React.JSX.Element => {
           </>
       }
     </Stack.Navigator>
-  )
-}
+  );
+};
 
 export default function MainNavigator(): React.JSX.Element {
   const { state } = useLogin()
