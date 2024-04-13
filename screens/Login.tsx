@@ -1,13 +1,11 @@
 import React from "react";
 import AuthForm from "../components/AuthForm";
-import { StackScreenProps } from "@react-navigation/stack";
-import { RootParamList } from "../navigators/MainNavigator";
-type ScreenProps = StackScreenProps<RootParamList>
+import { NavigationProp } from "../props/Navigation";
 
-export default function Login({navigation, route}: ScreenProps): React.JSX.Element {
+export default function Login({ navigation, route }: NavigationProp): React.JSX.Element {
   return (
     <>
-      <AuthForm navigation={navigation} route={route}/>
+      <AuthForm navigation={navigation} route={route} />
     </>
   )
 }
