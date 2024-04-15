@@ -5,6 +5,7 @@ import { db, usersRef } from "../configs/firebaseConfig";
 import { onSnapshot, query, where, collection, getDocs } from "@firebase/firestore";
 import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
+import SignOutBtn from "../components/SignOutBtn"
 
 const ChatScreen = () => {
   const { state: currentUser } = useLogin()
@@ -82,6 +83,7 @@ const ChatScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chat Home</Text>
+      <SignOutBtn />
       <FlatList
         data={users}
         keyExtractor={(item) => item.id}
