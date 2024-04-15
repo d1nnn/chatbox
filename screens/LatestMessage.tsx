@@ -10,8 +10,12 @@ import Welcome from './Welcome'
 import MessageSwipe from '../components/MessageSwipe'
 import { EventHandler } from 'react-native-reanimated'
 
+type LatestMessageProp = {
+  handleLatestMessage: () => void
+}
+
 const { width, height } = Dimensions.get('window')
-export default function LatestMessage({ navigation }: NavigationProp): React.JSX.Element {
+export default function LatestMessage({ handleLatestMessage }: LatestMessageProp): React.JSX.Element {
   const { state } = useLogin()
   const [messageLength, setMessageLength] = useState<number>(2)
   const [messages, setMessages] = useState(
@@ -53,7 +57,7 @@ export default function LatestMessage({ navigation }: NavigationProp): React.JSX
             <MessageSwipe length={messages.length} rotate="0deg" data={messages[0]} onRemove={removeMessage} />
 
         }
-        <FloatButton position={messages.length >= 2 ? "right" : "bottom"} translate={messages.length >= 2 ? "X" : "Y"} navigation={navigation} />
+        <FloatButton position={messages.length >= 2 ? "right" : "bottom"} translate={messages.length >= 2 ? "X" : "Y"} handleLatestMessage={() => handleLatestMessage()} />
       </View >
     </GestureHandlerRootView>
   )

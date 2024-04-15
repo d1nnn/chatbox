@@ -9,10 +9,11 @@ import Animated from "react-native-reanimated";
 type FloatButtonProp = {
   position: "right" | "bottom"
   translate: "X" | "Y"
+  handleLatestMessage: () => void
 }
 
 
-export default function FloatButton({ position, translate, navigation }: FloatButtonProp & NavigationProp): React.JSX.Element {
+export default function FloatButton({ position, translate, handleLatestMessage }: FloatButtonProp): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const translateVal = useSharedValue(0)
   const rotateVal = useSharedValue("0deg")
@@ -56,7 +57,7 @@ export default function FloatButton({ position, translate, navigation }: FloatBu
   return (
 
     <View style={[styles.floatBtnContainer, { [position]: position === "right" ? 10 : 30, flexDirection: position === "right" ? 'row' : 'column' }]}>
-      <TouchableWithoutFeedback onPress={() => { navigation?.navigate("ChatScreen"); }}>
+      <TouchableWithoutFeedback onPress={handleLatestMessage}>
         <Animated.View
           style={[
             styles.button,

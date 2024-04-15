@@ -33,7 +33,7 @@ export default function LoginForm({ navigation }: NavigationProp): React.JSX.Ele
     firebaseApi.signInWithEmailAndPassword(firebaseApi.auth, userInfo.username, userInfo.password)
       .then(res => {
         res.user.getIdToken().then(t => {
-          dispatch({ type: 'LOGIN', payload: { email: res.user.email, displayName: res.user.displayName, token: t } })
+          dispatch({ type: 'LOGIN', payload: { id: res.user.uid, email: res.user.email, displayName: res.user.displayName, token: t } })
         })
       })
       .catch(err => console.error(err))

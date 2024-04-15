@@ -29,5 +29,6 @@ export function CustomDrawerContent(props: any): React.JSX.Element {
 
 const styles = StyleSheet.create({
   signoutBtn: {
+    marginTop: 30
   }
 })

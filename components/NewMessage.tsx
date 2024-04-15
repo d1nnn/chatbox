@@ -38,7 +38,6 @@ export default function NewMessage({ length, rotate, scale, data }: NewMessagePr
     ]
   }))
 
-  console.log(data)
 
 
   return (

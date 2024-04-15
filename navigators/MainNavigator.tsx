@@ -2,13 +2,15 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Home from "../screens/Home";
 import About from "../screens/About";
 import useLogin from "../hooks/useLogin";
-import DrawerNavigator from "./DrawerNavigator";
+import BottomTabNavigator from "./BottomTabNavigator";
 import Login from "../screens/Login";
 import Loading from "../screens/Loading";
 import Welcome from "../screens/Welcome";
 import LatestMessage from "../screens/LatestMessage";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatScreen from "../screens/ChatScreen";
+import { useState } from "react";
+import { MessageType } from "../types/MessageTypes";
 
 
 export type RootParamList = {
@@ -22,7 +24,6 @@ export type RootParamList = {
 const Stack = createStackNavigator<RootParamList>()
 
 
-
 const StackNavigator = (): React.JSX.Element => {
   const { state } = useLogin()
   return (
@@ -30,8 +31,7 @@ const StackNavigator = (): React.JSX.Element => {
       {
         state.data ?
           <>
-            <Stack.Screen component={DrawerNavigator} name="Home"></Stack.Screen>
-            <Stack.Screen component={ChatScreen} name="ChatScreen"></Stack.Screen>
+            <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
           </>
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>

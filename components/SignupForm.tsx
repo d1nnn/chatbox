@@ -4,10 +4,11 @@ import { View } from 'react-native'
 import FormInput from './FormInput'
 import FormContainer from './FormContainer'
 import FormSubmitButton from './FormSubmitButton'
-import firebaseApi from '../configs/firebaseConfig';
+import firebaseApi, { db, usersRef } from '../configs/firebaseConfig';
 import useLogin from '../hooks/useLogin'
 import { UserAction } from '../constants/user'
 import { NavigationProp } from '../props/Navigation'
+import { collection, doc, getDoc, getDocs, setDoc } from '@firebase/firestore'
 
 type RegisterInfo = {
   username: string;
@@ -17,7 +18,7 @@ type RegisterInfo = {
 };
 
 export default function SignupForm({ navigation }: NavigationProp): React.JSX.Element {
-  const { state, dispatch } = useLogin()
+  const { state: currentUser, dispatch } = useLogin()
   const [userInfo, setUserInfo] = useState<RegisterInfo>({
     username: "",
     displayName: "",
@@ -28,8 +29,14 @@ export default function SignupForm({ navigation }: NavigationProp): React.JSX.El
   const handleSignup = async () => {
     firebaseApi.createUserWithEmailAndPassword(firebaseApi.auth, userInfo.username, userInfo.password).then((res) => {
 
-      firebaseApi.updateProfile(res.user, { displayName: userInfo.displayName }).then(() => {
-        dispatch({ type: "UPDATE", payload: { ...state.data, displayName: res.user.displayName } })
+      firebaseApi.updateProfile(res.user, { displayName: userInfo.displayName }).then(async () => {
+        dispatch({ type: "UPDATE", payload: { ...currentUser.data, id: res.user.uid, displayName: res.user.displayName } })
+        setDoc(doc(db, "users", res.user.uid), {
+          displayName: res.user.displayName,
+          photoUrl: "https://res.cloudinary.com/dhzsuo26a/image/upload/v1713103952/profilepic_hhfvl5.png",
+          friends: []
+        })
+
 
         console.log("Updated successfull")
 
