@@ -30,7 +30,7 @@ const StackNavigator = (): React.JSX.Element => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {
         state.data ?
-          <>
+        <>
             <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
           </>
           : <>

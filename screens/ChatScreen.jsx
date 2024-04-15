@@ -81,6 +81,7 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
+      
       <Text style={styles.title}>Chat Home</Text>
       <FlatList
         data={users}
