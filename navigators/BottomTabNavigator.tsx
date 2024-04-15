@@ -8,6 +8,7 @@ import { useState } from "react"
 import { MessageType } from "../types/MessageTypes"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import ChatRoom from "../screens/ChatRoom"
+import Friends from "../screens/Friends"
 
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
@@ -26,6 +27,7 @@ export default function BottomTabNavigator() {
       <Tab.Navigator screenOptions={{ headerShown: true, headerTransparent: true, headerTitle: "" }} initialRouteName="ChatScreen">
         <Tab.Screen component={ChatScreen} name="ChatScreen" />
         <Tab.Screen component={ChatRoom} name="ChatRoom" />
+        <Tab.Screen component={Friends} name="Friends" />
       </Tab.Navigator>
   );
 }
