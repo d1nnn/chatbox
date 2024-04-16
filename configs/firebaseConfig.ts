@@ -19,7 +19,7 @@ const firebaseConfig = {
   projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
   messagingSenderId: process.env.EXPO_PUBLIC_SENDER_ID,
   appId: process.env.EXPO_PUBLIC_APP_ID,
-
+  
 }
 
 const app = initializeApp(firebaseConfig)

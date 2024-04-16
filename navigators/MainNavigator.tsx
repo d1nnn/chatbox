@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Home from "../screens/Home";
-import About from "../screens/About";
+import Profile from "../screens/Profile";
 import useLogin from "../hooks/useLogin";
 import BottomTabNavigator from "./BottomTabNavigator";
 import Login from "../screens/Login";
@@ -21,7 +21,11 @@ export type RootParamList = {
   Welcome: undefined
   LatestMessage: undefined
   ChatScreen: undefined
+<<<<<<< HEAD
   ChatRoom: undefined
+=======
+  Profile: undefined;
+>>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
 }
 const Stack = createStackNavigator<RootParamList>()
 
@@ -34,7 +38,11 @@ const StackNavigator = (): React.JSX.Element => {
         state.data ?
           <>
             <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
+<<<<<<< HEAD
             <Stack.Screen component={ChatRoom} name="ChatRoom" />
+=======
+            <Stack.Screen component={Profile} name="Profile"></Stack.Screen>
+>>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
           </>
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>

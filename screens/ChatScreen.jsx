@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Image } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
 import { onSnapshot, query, where, collection, getDocs } from "@firebase/firestore";
@@ -7,7 +7,12 @@ import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
 
+<<<<<<< HEAD
 const ChatScreen = ({ navigation }) => {
+=======
+
+const ChatScreen = ({navigation}) => {
+>>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
   const { state: currentUser } = useLogin()
   const [users, setUsers] = useState([]);
   const something = "haha"
@@ -87,6 +92,13 @@ const ChatScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View  >
+        <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>{console.log('click');  navigation.navigate('Profile'); }}>
+
+        <Image source={profilepic}  style={styles.profilePic} />
+        <Text>{currentUser.data.displayName}</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
       <FlatList
