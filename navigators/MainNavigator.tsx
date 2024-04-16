@@ -21,11 +21,8 @@ export type RootParamList = {
   Welcome: undefined
   LatestMessage: undefined
   ChatScreen: undefined
-<<<<<<< HEAD
   ChatRoom: undefined
-=======
   Profile: undefined;
->>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
 }
 const Stack = createStackNavigator<RootParamList>()
 
@@ -38,11 +35,7 @@ const StackNavigator = (): React.JSX.Element => {
         state.data ?
           <>
             <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
-<<<<<<< HEAD
             <Stack.Screen component={ChatRoom} name="ChatRoom" />
-=======
-            <Stack.Screen component={Profile} name="Profile"></Stack.Screen>
->>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
           </>
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>

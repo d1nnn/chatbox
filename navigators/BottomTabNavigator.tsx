@@ -27,12 +27,9 @@ export default function BottomTabNavigator() {
       :
       <Tab.Navigator screenOptions={{ headerShown: true, headerTransparent: true, headerTitle: "" }} initialRouteName="ChatScreen">
         <Tab.Screen component={ChatScreen} name="ChatScreen" />
-<<<<<<< HEAD
         <Tab.Screen component={Friends} name="Friends" />
-=======
         <Tab.Screen component={ChatRoom} name="ChatRoom" />
 
->>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
       </Tab.Navigator>
   );
 }
