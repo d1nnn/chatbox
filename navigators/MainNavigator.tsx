@@ -6,6 +6,7 @@ import BottomTabNavigator from "./BottomTabNavigator";
 import Login from "../screens/Login";
 import Loading from "../screens/Loading";
 import Welcome from "../screens/Welcome";
+import Profile from "../screens/Profile";
 import LatestMessage from "../screens/LatestMessage";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatScreen from "../screens/ChatScreen";
@@ -36,6 +37,7 @@ const StackNavigator = (): React.JSX.Element => {
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>
             <Stack.Screen component={Login} name="Auth"></Stack.Screen>
+            <Stack.Screen component={Profile} name="Profile"></Stack.Screen>
           </>
       }
     </Stack.Navigator>

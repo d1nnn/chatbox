@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Image } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
 import { onSnapshot, query, where, collection, getDocs } from "@firebase/firestore";
@@ -81,7 +81,9 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
-      
+      <TouchableOpacity onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
+        <Text>Go Back</Text>
+        </TouchableOpacity>
       <Text style={styles.title}>Chat Home</Text>
       <FlatList
         data={users}
