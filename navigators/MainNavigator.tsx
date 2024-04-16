@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatScreen from "../screens/ChatScreen";
 import { useState } from "react";
 import { MessageType } from "../types/MessageTypes";
+import ChatRoom from "../screens/ChatRoom";
 
 
 export type RootParamList = {
@@ -19,7 +20,8 @@ export type RootParamList = {
   Auth: undefined
   Welcome: undefined
   LatestMessage: undefined
-  ChatScreen: undefined;
+  ChatScreen: undefined
+  ChatRoom: undefined
 }
 const Stack = createStackNavigator<RootParamList>()
 
@@ -32,6 +34,7 @@ const StackNavigator = (): React.JSX.Element => {
         state.data ?
           <>
             <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
+            <Stack.Screen component={ChatRoom} name="ChatRoom" />
           </>
           : <>
             <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>

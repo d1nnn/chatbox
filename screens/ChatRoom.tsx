@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback } from "react-native";
+import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView } from "react-native";
+import { FontAwesome } from '@expo/vector-icons';
 
 
 const { width, height } = Dimensions.get('window')
@@ -7,17 +8,19 @@ const { width, height } = Dimensions.get('window')
 export default function ChatRoom(): React.JSX.Element {
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={40}>
+      <View style={styles.container}>
 
-      <View style={styles.inputContainer}>
-        <TextInput style={{ padding: 10, backgroundColor: '#333', width: width }} />
-        <TouchableWithoutFeedback onPress={() => {
-          console.log("this is from chat room")
-        }}>
-          <Text style={{ color: 'white', fontSize: 50 }}>Send</Text>
-        </TouchableWithoutFeedback>
+        <View style={styles.inputContainer}>
+          <TextInput style={styles.inputMessage} />
+          <TouchableWithoutFeedback onPress={() => {
+            console.log("this is from chat room")
+          }}>
+            <FontAwesome name="send" size={24} color="orange" />
+          </TouchableWithoutFeedback>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -30,6 +33,17 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    justifyContent: 'center', marginBottom: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    width,
+    gap: 20,
+  },
+  inputMessage: {
+    padding: 10,
+    backgroundColor: '#333',
+    width: width / 1.5,
+    borderRadius: 10,
+    color: 'white'
   }
 })

@@ -7,9 +7,10 @@ import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
 
-const ChatScreen = () => {
+const ChatScreen = ({ navigation }) => {
   const { state: currentUser } = useLogin()
   const [users, setUsers] = useState([]);
+  const something = "haha"
 
   async function fetchUsers() {
     const q = query(collection(db, "users"))
@@ -61,33 +62,38 @@ const ChatScreen = () => {
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }, navigation) => {
 
-    <ListItem
-      key={item.id}
-      bottomDivider
-      onPress={() => {
-        // Xử lý khi người dùng chọn một người để chat
-        console.log("Start chat with user:", item.id);
-      }}
-    >
-      <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
-      <ListItem.Content>
-        <ListItem.Title>{item.displayName}</ListItem.Title>
-        <ListItem.Subtitle>example.com</ListItem.Subtitle>
-      </ListItem.Content>
-      <ListItem.Chevron />
-    </ListItem>
-  );
+    return (
+
+      <ListItem
+        key={item.id}
+        bottomDivider
+        onPress={() => {
+          // Xử lý khi người dùng chọn một người để chat
+          console.log("Start chat with user:", item.id);
+          navigation.navigate("ChatRoom")
+        }}
+      >
+        <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
+        <ListItem.Content>
+          <ListItem.Title>{item.displayName}</ListItem.Title>
+          <ListItem.Subtitle>example.com</ListItem.Subtitle>
+        </ListItem.Content>
+        <ListItem.Chevron />
+      </ListItem>
+    )
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
       <FlatList
+        something="haha"
         data={users}
         keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+        renderItem={(item) => renderItem(item, navigation)}
       />
     </View>
   );
