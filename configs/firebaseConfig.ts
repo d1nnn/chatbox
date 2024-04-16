@@ -6,9 +6,9 @@ import {
   updateProfile,
   getReactNativePersistence,
   initializeAuth,
-  getAuth,
 } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getFirestore, collection, connectFirestoreEmulator, initializeFirestore } from '@firebase/firestore'
 
 
 
@@ -19,6 +19,7 @@ const firebaseConfig = {
   projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
   messagingSenderId: process.env.EXPO_PUBLIC_SENDER_ID,
   appId: process.env.EXPO_PUBLIC_APP_ID,
+
 }
 
 const app = initializeApp(firebaseConfig)
@@ -35,3 +36,16 @@ export default {
   signOut,
   updateProfile,
 }
+
+// export const db = getFirestore(app)
+// connectFirestoreEmulator(db, 'localhost', 8080);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  experimentalLongPollingOptions: { timeoutSeconds: 10 }
+})
+// connectFirestoreEmulator(db, '10.0.2.2', 8080);
+
+export const usersRef = collection(db, "users")
+
+
+export const roomsRef = collection(db, "rooms")

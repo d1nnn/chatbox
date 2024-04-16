@@ -13,7 +13,7 @@ const initialState = {
   isLoading: false, isError: false
 }
 
-export const LoginContext = createContext<LoginContextType>({state: initialState, dispatch: () => null})
+export const LoginContext = createContext<LoginContextType>({ state: initialState, dispatch: () => null })
 
 const reducer = (state: State<UserType>, action: Action<UserType>): State<UserType> => {
   switch (action.type) {
@@ -24,7 +24,8 @@ const reducer = (state: State<UserType>, action: Action<UserType>): State<UserTy
     case UserAction.LOGIN:
     case UserAction.UPDATE:
       return {
-        ...state, isLoading: false, isError: false, data: {displayName: action.payload?.displayName, email: action.payload?.email, token: action.payload?.token}      }
+        ...state, isLoading: false, isError: false, data: { id: action.payload?.id, displayName: action.payload?.displayName, email: action.payload?.email, token: action.payload?.token }
+      }
     case UserAction.LOGOUT:
       return {
         ...state, isLoading: false, isError: false, data: undefined
@@ -40,15 +41,16 @@ export default ({ children }: AuthProviderProps) => {
   const [state, dispatch] = useReducer(reducer, { isLoading: false, isError: false })
 
   useEffect(() => {
-    dispatch({type: UserAction.PENDING})
+    dispatch({ type: UserAction.PENDING })
     onAuthStateChanged(firebaseApi.auth, user => {
-      if(user) {
+      if (user) {
+
         user.getIdToken().then(t => {
-          dispatch({type: UserAction.LOGIN, payload: {email: user.email, displayName: user.displayName, token: t}})
+          dispatch({ type: UserAction.LOGIN, payload: { id: user.uid, email: user.email, displayName: user.displayName, token: t } })
         })
       } else {
         console.log("user logged out")
-        dispatch({type: UserAction.LOGOUT})
+        dispatch({ type: UserAction.LOGOUT })
       }
     })
   }, [])
