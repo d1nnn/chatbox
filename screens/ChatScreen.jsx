@@ -2,20 +2,17 @@ import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
-import { onSnapshot, query, where, collection, getDocs } from "@firebase/firestore";
+import { onSnapshot, query, where, collection, getDocs, getDoc, doc } from "@firebase/firestore";
 import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
+import { ConvertDateToString } from "../utils/time";
 
-<<<<<<< HEAD
 const ChatScreen = ({ navigation }) => {
-=======
 
-const ChatScreen = ({navigation}) => {
->>>>>>> 4d227e1 (thuỷ: không vào được ứng dụng, đứng luôn ở ngoài màn hình đen)
   const { state: currentUser } = useLogin()
   const [users, setUsers] = useState([]);
-  const something = "haha"
+  const [groups, setGroups] = useState([]);
 
   async function fetchUsers() {
     const q = query(collection(db, "users"))
@@ -36,38 +33,57 @@ const ChatScreen = ({navigation}) => {
       setUsers(userList)
     })
 
+
+
+  }
+
+  async function fetchGroups() {
+    console.log("starting to fetch groups")
+
+    const currentUserRef = doc(db, "users", currentUser.data?.id)
+
+    try {
+      var userResult = (await getDoc(currentUserRef)).data()
+      const currentUserGroupsQuery = query(collection(db, "groups"), where("id", "in", userResult.groupids))
+      // const currentUserGroupsQuery = query(collection(db, "groups"))
+
+      onSnapshot(currentUserGroupsQuery, (groupSnapshot) => {
+        let groupList = []
+        groupSnapshot.forEach(groupdoc => {
+          var groupResult = groupdoc.data()
+          const firstGroupMessageRef = doc(db, "messages", groupResult.messages[0])
+          onSnapshot(firstGroupMessageRef, messageSnapshot => {
+            const firstMessageResult = messageSnapshot.data()
+            groupResult.latestMessage = firstMessageResult.content
+
+            let messageDate = new Date(firstMessageResult.createdAt.toDate())
+
+            groupResult.time = ConvertDateToString(messageDate).substr(0, 5)
+            groupList.push(groupResult)
+          })
+
+        })
+        setGroups(groupList)
+      })
+
+
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   useEffect(() => {
-    fetchUsers()
+    // fetchUsers()
 
+    fetchGroups()
 
-    const userData = [
-      {
-        id: "1",
-        name: "Thuy Water",
-        email: "Thuynuoc@example.com",
-        avatar: "https://i.pravatar.cc/150?img=1",
-      },
-      {
-        id: "2",
-        name: "Mr Dat",
-        email: "singlebede@example.com",
-        avatar: "https://i.pravatar.cc/150?img=2",
-      },
-      {
-        id: "3",
-        name: "Namloveminh",
-        email: "namandminh@example.com",
-        avatar: "https://i.pravatar.cc/150?img=3",
-      },
-    ];
-
+    // return () => unsub()
   }, []);
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
   const renderItem = ({ item }, navigation) => {
+    console.log("group in renderitem: ", item)
 
     return (
 
@@ -76,16 +92,19 @@ const ChatScreen = ({navigation}) => {
         bottomDivider
         onPress={() => {
           // Xử lý khi người dùng chọn một người để chat
-          console.log("Start chat with user:", item.id);
-          navigation.navigate("ChatRoom")
+          console.log("Start chat with group:", item.id);
+          navigation.navigate("ChatRoom", item)
         }}
       >
         <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
         <ListItem.Content>
-          <ListItem.Title>{item.displayName}</ListItem.Title>
-          <ListItem.Subtitle>example.com</ListItem.Subtitle>
+          <ListItem.Title>{item.groupName}</ListItem.Title>
+          <ListItem.Subtitle>{item.latestMessage}</ListItem.Subtitle>
         </ListItem.Content>
-        <ListItem.Chevron />
+        <ListItem.Content>
+          <ListItem.Title style={{ marginLeft: 80 }}>{item.time}</ListItem.Title>
+        </ListItem.Content>
+
       </ListItem>
     )
   }
@@ -93,17 +112,16 @@ const ChatScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View  >
-        <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>{console.log('click');  navigation.navigate('Profile'); }}>
+        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
 
-        <Image source={profilepic}  style={styles.profilePic} />
-        <Text>{currentUser.data.displayName}</Text>
+          <Image source={profilepic} style={styles.profilePic} />
+          <Text>{currentUser.data.displayName}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
       <FlatList
-        something="haha"
-        data={users}
+        data={groups}
         keyExtractor={(item) => item.id}
         renderItem={(item) => renderItem(item, navigation)}
       />
@@ -114,7 +132,7 @@ const ChatScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#111",
     paddingHorizontal: 16,
     paddingTop: 32,
     marginTop: 50,
@@ -122,6 +140,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    color: 'orange',
     marginBottom: 16,
   },
   profilePic: {

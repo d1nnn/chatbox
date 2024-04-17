@@ -25,8 +25,10 @@ const reducer = (state: State<MessageType>, action: Action<MessageType>): State<
         ...state,
         isLoading: false, isError: false, data: {
           groupId: action.payload?.groupId,
-          users: action.payload?.users,
-          message: action.payload?.message,
+          userid: action.payload?.userid,
+          content: action.payload?.content,
+          createdAt: action.payload?.createdAt,
+          id: action.payload?.id,
         }
       }
     case MessageAction.PENDING:
