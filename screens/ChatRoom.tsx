@@ -37,7 +37,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
       if (currentUser && currentUser.data)
         fetchUsersFromGroup(group?.id, { exclude: false, userid: currentUser.data.id }, setUsers)
 
-      fetchMessagesCallback(group?.messages, setMessages)
+      fetchMessagesCallback(group?.id, setMessages)
     }
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity, ScrollView } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
 import { onSnapshot, query, where, collection, getDocs, getDoc, doc } from "@firebase/firestore";
@@ -60,20 +60,32 @@ const ChatScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View  >
+      <View style={{ flex: 1, flexDirection: 'row' }}>
         <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
 
           <Image source={profilepic} style={styles.profilePic} />
           <Text>{currentUser?.data?.displayName}</Text>
         </TouchableOpacity>
+        <Text style={styles.title}>Chat Screen</Text>
       </View>
-      <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
-      <FlatList
-        data={groups}
-        keyExtractor={(item) => item.id}
-        renderItem={(item) => renderItem(item, navigation)}
-      />
+      <View style={{ flex: 10 }}>
+        {
+          groups.length ?
+            <FlatList
+              data={groups}
+              keyExtractor={(item) => item.id}
+              renderItem={(item) => renderItem(item, navigation)}
+            />
+            :
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>Your history is empty. Start a group chat?</Text>
+              <TouchableOpacity>
+                <Text style={styles.btnText}>Create Group</Text>
+              </TouchableOpacity>
+            </View>
+        }
+      </View>
     </View>
   );
 };
@@ -91,12 +103,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: 'orange',
     marginBottom: 16,
+    flex: 1,
   },
   profilePic: {
     objectFit: 'cover',
     width: 40,
     height: 40,
     borderRadius: 40 / 2,
+  },
+  empty: {
+    flex: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: 'orange'
+  },
+  btnText: {
+    padding: 10,
+    backgroundColor: 'orange',
+    borderRadius: 5
   }
 });
 

@@ -29,6 +29,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#333'
   },
   signOutText: {
-    color: 'orange'
+    color: 'white',
+    padding: 10,
+    backgroundColor: 'red',
+    alignSelf: 'flex-start',
+    borderRadius: 5,
   }
 })

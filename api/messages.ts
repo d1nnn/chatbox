@@ -6,8 +6,8 @@ import { Dispatch, SetStateAction } from "react";
 
 
 
-export function fetchMessages(messageIds: string[], handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
-  var currentGroupMessagesQuery = query(collection(db, "messages"), where("id", "in", messageIds), orderBy("createdAt", "asc"))
+export function fetchMessages(groupid: string, handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
+  var currentGroupMessagesQuery = query(collection(db, "messages"), where("groupid", "==", groupid), orderBy("createdAt", "asc"))
   var unsub = onSnapshot(currentGroupMessagesQuery, async messageSnapshot => {
 
     const futureMessages = messageSnapshot.docs.map(async (messageDoc) => {

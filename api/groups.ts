@@ -13,18 +13,18 @@ export function fetchGroups(
   readOption?: { isRead: boolean },
 ): Unsubscribe {
 
-  let groupQuery: Query<DocumentData, DocumentData> = query(collection(db, "groups"));
-  if (readOption && !readOption.isRead) {
-    groupQuery = query(collection(db, "groups"), limit(6))
+  let groupQuery: Query<DocumentData, DocumentData>
+
+  if (!option.exclude && option.userid) {
+    groupQuery = query(collection(db, "groups"), where("users", "array-contains", option.userid))
+    if (readOption && !readOption.isRead) {
+      groupQuery = query(collection(db, "groups"), where("users", "array-contains", option.userid), limit(6))
+    }
+  } else {
+
+    groupQuery = query(collection(db, "groups"));
   }
 
-  if (!option.exclude) {
-    const currentUserRef = doc(db, "users", option.userid + "")
-    onSnapshot(currentUserRef, currentUserSnapshot => {
-      const userResult = currentUserSnapshot.data()
-      groupQuery = query(collection(db, "groups"), where("id", "in", userResult?.groupids))
-    })
-  }
 
 
   let unsub = onSnapshot(groupQuery, async (groupSnapshot: any) => {
@@ -32,7 +32,8 @@ export function fetchGroups(
 
     let futureGroup = groupSnapshot.docs.map(async (groupdoc: any) => {
       let groupResult = groupdoc.data()
-      const firstGroupMessageRef = query(collection(db, "messages"), where("id", "in", groupResult.messages), orderBy("createdAt", "desc"), limit(1))
+      console.log("GROUPRESULT: ", groupResult)
+      const firstGroupMessageRef = query(collection(db, "messages"), where("groupid", "==", groupResult.id), orderBy("createdAt", "desc"), limit(1))
       let messageResult;
       try {
         if (readOption) {

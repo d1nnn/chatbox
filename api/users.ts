@@ -13,6 +13,7 @@ export function fetchUsersFromGroup(groupid: string, option: CurrentUserOption, 
     let groupResult = groupDoc.data()
     console.log("groupResult: ", groupResult)
     const userQuery = query(collection(db, "users"), where("id", "in", groupResult?.users))
+    // const userQuery = query(collection(db, "users"), where("id", "in", ["", ""]))
 
     onSnapshot(userQuery, userSnapshot => {
       userSnapshot.forEach(doc => {
