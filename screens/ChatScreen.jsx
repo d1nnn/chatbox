@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity } from "react-native";
+=======
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
+>>>>>>> 47b7f33617fb8a8c91a266373d2ca3d23abd9e52
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
 import { onSnapshot, query, where, collection, getDocs, getDoc, doc } from "@firebase/firestore";
@@ -60,6 +64,7 @@ const ChatScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <View  >
         <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
 
@@ -67,6 +72,11 @@ const ChatScreen = ({ navigation }) => {
           <Text>{currentUser?.data?.displayName}</Text>
         </TouchableOpacity>
       </View>
+=======
+      <TouchableOpacity onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
+        <Text>Go Back</Text>
+        </TouchableOpacity>
+>>>>>>> 47b7f33617fb8a8c91a266373d2ca3d23abd9e52
       <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
       <FlatList
