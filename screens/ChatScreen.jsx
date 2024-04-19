@@ -1,88 +1,93 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
-import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity } from "react-native";
-=======
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
->>>>>>> 47b7f33617fb8a8c91a266373d2ca3d23abd9e52
+import { View, Text, FlatList, StyleSheet, Image } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { db, usersRef } from "../configs/firebaseConfig";
-import { onSnapshot, query, where, collection, getDocs, getDoc, doc } from "@firebase/firestore";
+import { onSnapshot, query, where, collection, getDocs } from "@firebase/firestore";
 import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
-import { ConvertDateToString } from "../utils/time";
-import { fetchUsers } from "../api/users";
-import { fetchGroups } from "../api/groups";
-import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 
-const ChatScreen = ({ navigation }) => {
-  const isFocused = useIsFocused()
-
+const ChatScreen = () => {
   const { state: currentUser } = useLogin()
   const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
 
+  async function fetchUsers() {
+    const q = query(collection(db, "users"))
+
+
+    const unsub = onSnapshot(q, querySnapshot => {
+      const userList = []
+
+      querySnapshot.forEach(doc => {
+        let data = doc.data()
+
+
+        if (doc.id !== currentUser.data.id) {
+          let url = `${data.photoUrl}`
+          userList.push({ ...data, id: doc.id })
+        }
+      })
+      setUsers(userList)
+    })
+
+  }
 
   useEffect(() => {
+    fetchUsers()
 
-    if (isFocused) {
 
-      fetchGroups({ exclude: false, userid: currentUser.data.id }, setGroups)
+    const userData = [
+      {
+        id: "1",
+        name: "Thuy Water",
+        email: "Thuynuoc@example.com",
+        avatar: "https://i.pravatar.cc/150?img=1",
+      },
+      {
+        id: "2",
+        name: "Mr Dat",
+        email: "singlebede@example.com",
+        avatar: "https://i.pravatar.cc/150?img=2",
+      },
+      {
+        id: "3",
+        name: "Namloveminh",
+        email: "namandminh@example.com",
+        avatar: "https://i.pravatar.cc/150?img=3",
+      },
+    ];
 
-    }
-
-    // return () => unsub()
-  }, [isFocused, currentUser]);
+  }, []);
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
-  const renderItem = ({ item }, navigation) => {
+  const renderItem = ({ item }) => (
 
-    return (
-
-      <ListItem
-        key={item.id}
-        bottomDivider
-        onPress={() => {
-          // Xử lý khi người dùng chọn một người để chat
-          console.log("Start chat with group:", item.id);
-          navigation.navigate("ChatRoom", item)
-        }}
-      >
-        <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
-        <ListItem.Content>
-          <ListItem.Title>{item.groupName}</ListItem.Title>
-          <ListItem.Subtitle>{item.latestMessage}</ListItem.Subtitle>
-        </ListItem.Content>
-        <ListItem.Content>
-          <ListItem.Title style={{ marginLeft: 80 }}>{item.time}</ListItem.Title>
-        </ListItem.Content>
-
-      </ListItem>
-    )
-  }
+    <ListItem
+      key={item.id}
+      bottomDivider
+      onPress={() => {
+        // Xử lý khi người dùng chọn một người để chat
+        console.log("Start chat with user:", item.id);
+      }}
+    >
+      <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
+      <ListItem.Content>
+        <ListItem.Title>{item.displayName}</ListItem.Title>
+        <ListItem.Subtitle>example.com</ListItem.Subtitle>
+      </ListItem.Content>
+      <ListItem.Chevron />
+    </ListItem>
+  );
 
   return (
     <View style={styles.container}>
-<<<<<<< HEAD
-      <View  >
-        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
-
-          <Image source={profilepic} style={styles.profilePic} />
-          <Text>{currentUser?.data?.displayName}</Text>
-        </TouchableOpacity>
-      </View>
-=======
-      <TouchableOpacity onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
-        <Text>Go Back</Text>
-        </TouchableOpacity>
->>>>>>> 47b7f33617fb8a8c91a266373d2ca3d23abd9e52
       <Text style={styles.title}>Chat Home</Text>
       <SignOutBtn />
       <FlatList
-        data={groups}
+        data={users}
         keyExtractor={(item) => item.id}
-        renderItem={(item) => renderItem(item, navigation)}
+        renderItem={renderItem}
       />
     </View>
   );
@@ -91,7 +96,7 @@ const ChatScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingTop: 32,
     marginTop: 50,
@@ -99,7 +104,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: 'orange',
     marginBottom: 16,
   },
   profilePic: {

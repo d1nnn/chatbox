@@ -1,29 +1,22 @@
 import { createDrawerNavigator } from "@react-navigation/drawer"
 import Home from "../screens/Home"
-import Profile from "../screens/Profile"
+import About from "../screens/About"
 import { CustomDrawerContent } from "./CustomeDrawerContent"
 import LatestMessage from "../screens/LatestMessage"
 import ChatScreen from "../screens/ChatScreen"
 import { useState } from "react"
 import { MessageType } from "../types/MessageTypes"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import ChatRoom from "../screens/ChatRoom"
 import Friends from "../screens/Friends"
-import { createStackNavigator } from "@react-navigation/stack"
-import { NavigationProp } from "../props/Navigation"
-import { GroupType } from "../types/GroupTypes"
 
 const Tab = createBottomTabNavigator()
-const Stack = createStackNavigator()
+const Drawer = createDrawerNavigator()
 
 
-export default function BottomTabNavigator({ navigation }: NavigationProp) {
+export default function BottomTabNavigator() {
   const [messages, setMessages] = useState<MessageType | null>();
   const [hasLatestMessage, setHasLatestMessage] = useState<boolean>(true)
-
-  function goToMessage(item: any) {
-    navigation?.navigate("ChatRoom", item)
-  }
-
   return (
     !messages && hasLatestMessage ?
       <LatestMessage handleLatestMessage={() => {
@@ -33,8 +26,8 @@ export default function BottomTabNavigator({ navigation }: NavigationProp) {
       :
       <Tab.Navigator screenOptions={{ headerShown: true, headerTransparent: true, headerTitle: "" }} initialRouteName="ChatScreen">
         <Tab.Screen component={ChatScreen} name="ChatScreen" />
+        <Tab.Screen component={ChatRoom} name="ChatRoom" />
         <Tab.Screen component={Friends} name="Friends" />
-
       </Tab.Navigator>
   );
 }

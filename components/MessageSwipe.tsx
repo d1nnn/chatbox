@@ -3,11 +3,15 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { Dimensions, Text, StyleSheet, NativeSyntheticEvent } from "react-native";
 import NewMessage from "./NewMessage";
-import { GroupType } from "../types/GroupTypes";
 
 interface IMessageSwipe {
-  onRemove: (id: string) => void
-  data: GroupType,
+  onRemove: (id: number) => void
+  data: {
+    id: number
+    displayName: string,
+    photoUrl: string,
+    message: string
+  },
   length: number
   rotate: string
 };
@@ -47,7 +51,7 @@ const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate 
         marginVertical.value = withTiming(0)
         swipeTranslateX.value = withTiming(-WIDTH_SCREEN, undefined, (isDone) => {
           if (isDone) {
-            runOnJS(onRemove)(data?.id + "")
+            runOnJS(onRemove)(data?.id)
 
             swipeTranslateX.value = WIDTH_SCREEN
             swipeTranslateX.value = withTiming(0, { duration: 500 })
@@ -58,6 +62,7 @@ const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate 
       }
       pressed.value = false
     });
+
   const transformStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: swipeTranslateX.value },

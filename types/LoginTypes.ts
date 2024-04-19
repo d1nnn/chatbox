@@ -4,7 +4,6 @@ export type UserType = {
   id?: string | null,
   email?: string | null,
   displayName?: string | null,
-  photoUrl?: string | null,
   token?: string | null,
 }
 

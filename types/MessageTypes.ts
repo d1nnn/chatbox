@@ -4,21 +4,10 @@ import { UserType } from "./LoginTypes"
 
 export type MessageType = {
   groupId?: string,
-  content?: string,
-  user?: UserType,
-  userid?: string,
-  createdAt?: Date,
-  id?: string,
-  isRead?: boolean
-}
-
-export type AddMessageType = {
-  content: string,
-  groupid: string,
-  userid: string,
-  isFile: boolean,
-  createdAt: Date,
-  isRead: boolean,
+  message?: string,
+  users?: {
+    [user: string]: UserType
+  }
 }
 
 type MessageContextType = {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { View, StyleSheet, Dimensions, NativeSyntheticEvent } from 'react-native'
 import NewMessage from '../components/NewMessage'
 import FloatButton from '../components/FloatButton'
@@ -9,44 +9,55 @@ import Login from './Login'
 import Welcome from './Welcome'
 import MessageSwipe from '../components/MessageSwipe'
 import { EventHandler } from 'react-native-reanimated'
-import { fetchUnreadMessages } from '../api/messages'
-import { GroupType } from '../types/GroupTypes'
-import { fetchGroups } from '../api/groups'
-import { useIsFocused } from '@react-navigation/native'
 
 type LatestMessageProp = {
   handleLatestMessage: () => void
 }
 
 const { width, height } = Dimensions.get('window')
-export default function LatestMessage({ handleLatestMessage }: LatestMessageProp & NavigationProp): React.JSX.Element {
-  const { state: currentUser } = useLogin()
-  const [groups, setGroups] = useState<GroupType[]>([])
-  const isFocused = useIsFocused()
+export default function LatestMessage({ handleLatestMessage }: LatestMessageProp): React.JSX.Element {
+  const { state } = useLogin()
+  const [messageLength, setMessageLength] = useState<number>(2)
+  const [messages, setMessages] = useState(
+    [
+      {
+        id: 1,
+        photoUrl: "https://res.cloudinary.com/dhzsuo26a/image/upload/v1710853580/qcqcakqtsiuxkcynnl06.webp",
+        displayName: "Dat",
+        message: "This shouldn't be me. Where have you been?"
+      },
+      {
+        id: 2,
+        photoUrl: "https://res.cloudinary.com/dhzsuo26a/image/upload/v1710853580/qcqcakqtsiuxkcynnl06.webp",
+        displayName: "Not Dat",
+        message: "This shouldn't be me. Where have you been?"
+      },
+      {
+        id: 3,
+        photoUrl: "https://res.cloudinary.com/dhzsuo26a/image/upload/v1710853580/qcqcakqtsiuxkcynnl06.webp",
+        displayName: "Dingding",
+        message: "This shouldn't be me. Where have you been?"
+      },
+    ])
 
-  function removeMessage(id: string) {
+  function removeMessage(id: number) {
     if (!id)
       return
-    setGroups(prev => prev.filter(data => data.id !== id))
+    setMessages(prev => prev.filter(data => data.id !== id))
   }
-
-  useEffect(() => {
-    if (isFocused)
-      fetchGroups({ exclude: false, userid: currentUser?.data?.id }, setGroups, { isRead: false })
-  }, [isFocused])
 
 
   return (
     <GestureHandlerRootView style={{ width, height }}>
       <View style={styles.container}>
         {
-          groups.length ? groups.map((group, i) => (
-            <MessageSwipe length={group.latestMessage?.length ?? 0} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={group} onRemove={removeMessage} key={i} />
+          messages.length ? messages.slice(0, 2).map((data, i) => (
+            <MessageSwipe length={messages.length} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={data} onRemove={removeMessage} key={i} />
           )) :
-            <MessageSwipe length={groups.length} rotate="0deg" data={groups[0]} onRemove={removeMessage} />
+            <MessageSwipe length={messages.length} rotate="0deg" data={messages[0]} onRemove={removeMessage} />
 
         }
-        <FloatButton position={groups.length >= 2 ? "right" : "bottom"} translate={groups.length >= 2 ? "X" : "Y"} handleLatestMessage={() => handleLatestMessage()} />
+        <FloatButton position={messages.length >= 2 ? "right" : "bottom"} translate={messages.length >= 2 ? "X" : "Y"} handleLatestMessage={() => handleLatestMessage()} />
       </View >
     </GestureHandlerRootView>
   )

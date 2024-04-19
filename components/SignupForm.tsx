@@ -32,11 +32,9 @@ export default function SignupForm({ navigation }: NavigationProp): React.JSX.El
       firebaseApi.updateProfile(res.user, { displayName: userInfo.displayName }).then(async () => {
         dispatch({ type: "UPDATE", payload: { ...currentUser.data, id: res.user.uid, displayName: res.user.displayName } })
         setDoc(doc(db, "users", res.user.uid), {
-          id: res.user.uid,
           displayName: res.user.displayName,
           photoUrl: "https://res.cloudinary.com/dhzsuo26a/image/upload/v1713103952/profilepic_hhfvl5.png",
-          friends: [],
-          groupids: []
+          friends: []
         })
 
 
