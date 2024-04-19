@@ -22,5 +22,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  textStyle: {
+    padding: 15,
+    backgroundColor: 'orange',
+    color: 'black',
   }
 })

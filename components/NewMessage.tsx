@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
+import { GroupType } from "../types/GroupTypes";
+import { NavigationContext } from "@react-navigation/native";
 
 type NewMessageProp = {
   length: number,
   rotate: string
   scale: number
-  data: {
-    photoUrl: string,
-    displayName: string,
-    message: string
-  }
+  data: GroupType
 }
 
 const { width, height } = Dimensions.get('window')
 
 
 export default function NewMessage({ length, rotate, scale, data }: NewMessageProp): React.JSX.Element {
+  const navigation = useContext(NavigationContext)
   const [isRendered, setIsRendered] = useState<boolean>(false)
 
   const rotateVal = useSharedValue("0deg")
   const scaleVal = useSharedValue(0)
+
+  function goToMessage() {
+    const group: any = data
+    navigation?.navigate("ChatRoom", group)
+  }
 
   useEffect(() => {
     setIsRendered(!isRendered)
@@ -46,9 +50,9 @@ export default function NewMessage({ length, rotate, scale, data }: NewMessagePr
         <View style={styles.photoContainer}>
           <Image source={{ uri: data.photoUrl }} style={styles.photo} />
         </View>
-        <Text style={styles.displayName}>@{data.displayName}</Text>
-        <Text style={styles.message}>{data.message.length < 60 ? data.message : data.message.slice(0, 60) + "..."}</Text>
-        <TouchableOpacity style={styles.messageBtn}>
+        <Text style={styles.displayName}>@{data.groupName}</Text>
+        <Text style={styles.message}>{data?.latestMessage?.length ?? 0 < 60 ? data.latestMessage : data?.latestMessage?.slice(0, 60) + "..."}</Text>
+        <TouchableOpacity style={styles.messageBtn} onPress={goToMessage}>
           <Ionicons name="chatbox-outline" size={40} color="orange" style={styles.messageIcon} />
         </TouchableOpacity>
       </Animated.View>

@@ -7,83 +7,32 @@ import useLogin from "../hooks/useLogin";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
 import { ConvertDateToString } from "../utils/time";
+import { fetchUsers } from "../api/users";
+import { fetchGroups } from "../api/groups";
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 
 const ChatScreen = ({ navigation }) => {
+  const isFocused = useIsFocused()
 
   const { state: currentUser } = useLogin()
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
 
-  async function fetchUsers() {
-    const q = query(collection(db, "users"))
-
-
-    const unsub = onSnapshot(q, querySnapshot => {
-      const userList = []
-
-      querySnapshot.forEach(doc => {
-        let data = doc.data()
-
-
-        if (doc.id !== currentUser.data.id) {
-          let url = `${data.photoUrl}`
-          userList.push({ ...data, id: doc.id })
-        }
-      })
-      setUsers(userList)
-    })
-
-
-
-  }
-
-  async function fetchGroups() {
-    console.log("starting to fetch groups")
-
-    const currentUserRef = doc(db, "users", currentUser.data?.id)
-
-    try {
-      var userResult = (await getDoc(currentUserRef)).data()
-      const currentUserGroupsQuery = query(collection(db, "groups"), where("id", "in", userResult.groupids))
-      // const currentUserGroupsQuery = query(collection(db, "groups"))
-
-      onSnapshot(currentUserGroupsQuery, (groupSnapshot) => {
-        let groupList = []
-        groupSnapshot.forEach(groupdoc => {
-          var groupResult = groupdoc.data()
-          const firstGroupMessageRef = doc(db, "messages", groupResult.messages[0])
-          onSnapshot(firstGroupMessageRef, messageSnapshot => {
-            const firstMessageResult = messageSnapshot.data()
-            groupResult.latestMessage = firstMessageResult.content
-
-            let messageDate = new Date(firstMessageResult.createdAt.toDate())
-
-            groupResult.time = ConvertDateToString(messageDate).substr(0, 5)
-            groupList.push(groupResult)
-          })
-
-        })
-        setGroups(groupList)
-      })
-
-
-    } catch (err) {
-      console.error(err)
-    }
-  }
 
   useEffect(() => {
-    // fetchUsers()
 
-    fetchGroups()
+    if (isFocused) {
+
+      fetchGroups({ exclude: false, userid: currentUser.data.id }, setGroups)
+
+    }
 
     // return () => unsub()
-  }, []);
+  }, [isFocused, currentUser]);
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
   const renderItem = ({ item }, navigation) => {
-    console.log("group in renderitem: ", item)
 
     return (
 
@@ -115,7 +64,7 @@ const ChatScreen = ({ navigation }) => {
         <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
 
           <Image source={profilepic} style={styles.profilePic} />
-          <Text>{currentUser.data.displayName}</Text>
+          <Text>{currentUser?.data?.displayName}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.title}>Chat Home</Text>
