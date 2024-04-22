@@ -9,32 +9,54 @@ import { MessageType } from "../types/MessageTypes"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import Friends from "../screens/Friends"
 import { createStackNavigator } from "@react-navigation/stack"
-import { NavigationProp } from "../props/Navigation"
-import { GroupType } from "../types/GroupTypes"
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import useUsers, { UserCtx } from "../hooks/useUsers"
+import { UserType } from "../types/UserTypes"
 
 const Tab = createBottomTabNavigator()
-const Stack = createStackNavigator()
 
 
-export default function BottomTabNavigator({ navigation }: NavigationProp) {
+export default function BottomTabNavigator() {
   const [messages, setMessages] = useState<MessageType | null>();
   const [hasLatestMessage, setHasLatestMessage] = useState<boolean>(true)
 
-  function goToMessage(item: any) {
-    navigation?.navigate("ChatRoom", item)
-  }
 
   return (
     !messages && hasLatestMessage ?
       <LatestMessage handleLatestMessage={() => {
-        console.log("has latest message: ", hasLatestMessage)
         setHasLatestMessage(false)
       }} />
       :
-      <Tab.Navigator screenOptions={{ headerShown: true, headerTransparent: true, headerTitle: "" }} initialRouteName="ChatScreen">
-        <Tab.Screen component={ChatScreen} name="ChatScreen" />
-        <Tab.Screen component={Friends} name="Friends" />
+      <Tab.Navigator screenOptions={{
+        headerShown: true,
+        headerTransparent: true,
+        headerTitle: "",
+        tabBarStyle: {
+          height: 60,
+          paddingHorizontal: 5,
+          paddingTop: 0,
+          position: 'absolute',
+          borderTopWidth: 0,
+        },
+        tabBarActiveTintColor: "orange",
+        tabBarInactiveTintColor: "#999",
+      }}
 
-      </Tab.Navigator>
+        initialRouteName="ChatScreen"
+      >
+        <Tab.Screen component={ChatScreen} name="Boxes" options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="alpha-b-box-outline" size={24} color={color} />
+          ),
+
+        }} />
+        <Tab.Screen component={Friends} name="Friends" options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="emoji-people" size={24} color={color} />
+          )
+        }} />
+
+      </Tab.Navigator >
   );
 }

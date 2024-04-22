@@ -3,6 +3,7 @@ import { AddMessageType, MessageType } from "../types/MessageTypes";
 import { db } from "../configs/firebaseConfig";
 import { Unsubscribe } from "firebase/auth";
 import { Dispatch, SetStateAction } from "react";
+import { UserType } from "../types/UserTypes";
 
 
 
@@ -32,20 +33,54 @@ export async function addMessage(payload: AddMessageType): Promise<string> {
   const messagesRef = collection(db, "messages")
   const updateGroupMessageRef = doc(db, "groups", payload.groupid)
 
+  const usersQuery = query(collection(db, "users"), where("id", "!=", payload.userid), where("groupids", "array-contains", payload.groupid))
+
+  try {
+    var usersSnapshot = await getDocs(usersQuery)
+    let futureUsers = usersSnapshot.docs.map(async (userdoc) => {
+      let userResult = userdoc.data()
+      let userRef = doc(db, "users", userResult.id)
+      try {
+        await updateDoc(userRef, {
+          unread: arrayUnion({
+            groupid: payload.groupid,
+            isRead: false
+          })
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    })
+  } catch (err) {
+    console.error(err)
+  }
+
+
+  // usersSnapshot.forEach(userdoc => {
+  //   let usersResult = userdoc.data()
+  //   let userRef = doc(db, "users", usersResult.id)
+  //   let futureUser
+  //   updateDoc(userRef, {
+  //     unread: {
+  //       groupid: payload.groupid,
+  //       isRead: false,
+  //     }
+  //   }).then(() => { }).catch(err => console.error(err))
+  // })
+
+
 
   const result = await addDoc(messagesRef, payload)
-  const updateMessageRef = doc(db, "messages", result.id)
-  await updateDoc(updateMessageRef, {
-    id: result.id
-  })
   await updateDoc(updateGroupMessageRef, {
-    messages: arrayUnion(result.id)
+    messages: arrayUnion(result.id),
+    isRead: false
   })
 
   return result.id
 }
 
 export function fetchMessage(messageId: string, handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
+  console.log("called")
   let messageQuery = doc(db, "messages", messageId)
   let unsub = onSnapshot(messageQuery, async messageSnapshot => {
     let data = messageSnapshot.data()
@@ -61,7 +96,7 @@ export function fetchMessage(messageId: string, handleMessages?: Dispatch<SetSta
     onSnapshot(userQuery, userSnapshot => {
       let userResult = userSnapshot.data()
       if (messageResult)
-        messageResult.user = userResult
+        messageResult.user = userResult as UserType
 
       if (handleMessages) {
         handleMessages(prev => ([...prev, messageResult]))

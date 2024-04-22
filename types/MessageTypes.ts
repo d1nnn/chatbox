@@ -1,6 +1,4 @@
-
-import { Dispatch } from "react"
-import { UserType } from "./LoginTypes"
+import { UserType } from "./UserTypes"
 
 export type MessageType = {
   groupId?: string,
@@ -9,7 +7,6 @@ export type MessageType = {
   userid?: string,
   createdAt?: Date,
   id?: string,
-  isRead?: boolean
 }
 
 export type AddMessageType = {
@@ -18,23 +15,9 @@ export type AddMessageType = {
   userid: string,
   isFile: boolean,
   createdAt: Date,
-  isRead: boolean,
-}
-
-type MessageContextType = {
-  state: State<MessageType>
-  dispatch: Dispatch<any>
 }
 
 
 
-type State<T> = {
-  data?: T,
-  isLoading: boolean,
-  isError: boolean,
-  error?: string
-}
 
-type Action<T> = { type: 'FETCH' | 'PENDING', payload?: T }
 
-export { MessageContextType, State, Action }

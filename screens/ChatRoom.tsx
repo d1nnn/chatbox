@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Image, NativeSyntheticEvent, TextInputChangeEventData, Pressable } from "react-native";
 import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp } from "../props/Navigation";
@@ -7,7 +7,7 @@ import useLogin from "../hooks/useLogin";
 import BackBtn from "../components/BackBtn";
 import { addMessage, fetchMessage, fetchMessages } from "../api/messages";
 import { fetchUsersFromGroup } from "../api/users";
-import { UserType } from "../types/LoginTypes";
+import { UserType } from "../types/UserTypes";
 import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
 
@@ -19,15 +19,14 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   const { state: currentUser } = useLogin()
   const isFocused = useIsFocused()
   const [textInput, setTextInput] = useState<string>("")
-  console.log(messages)
+  const scrollViewRef = useRef<ScrollView>(null)
 
 
   const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
     const group: any = route?.params
-    const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id, createdAt: Timestamp.now().toDate(), isRead: false })
-    fetchMessage(id, setMessages)
-
+    const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id, createdAt: Timestamp.now().toDate() })
+    setTextInput("")
   }
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
       const group: any = route?.params
 
       if (currentUser && currentUser.data)
-        fetchUsersFromGroup(group?.id, { exclude: false, userid: currentUser.data.id }, setUsers)
+        fetchUsersFromGroup(group?.id, { userid: currentUser.data.id }, setUsers)
 
       fetchMessagesCallback(group?.id, setMessages)
     }
@@ -47,21 +46,19 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
     <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1 }}>
       <BackBtn navigation={navigation} />
       <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.messages}>
+        <ScrollView contentContainerStyle={styles.messages} ref={scrollViewRef} onContentSizeChange={() => { scrollViewRef.current?.scrollToEnd() }}>
           {
             messages
             &&
-            messages.map(m =>
+            messages.map((m, i) =>
             (
               <View
-                key={m.id}
+                key={i}
                 style={[styles.messageContainer,
                 (m.userid === currentUser?.data?.id) && styles.messageContainerRight]}
               >
-                <Pressable>
-                  {currentUser?.data?.id != m.userid && <Image source={{ uri: m.user?.photoUrl + "" }} style={{ height: 48, width: 48, borderRadius: 48 / 2 }} />}
-                  <Text style={[styles.messageText, m.userid === currentUser?.data?.id && { backgroundColor: 'orange' }]}>{m.content}</Text>
-                </Pressable>
+                {currentUser?.data?.id != m.userid && <Image source={{ uri: m.user?.photoUrl + "" }} style={{ height: 48, width: 48, borderRadius: 48 / 2 }} />}
+                <Text style={[styles.messageText, m.userid === currentUser?.data?.id && { backgroundColor: 'orange' }]}>{m.content}</Text>
               </View>
             )
             )

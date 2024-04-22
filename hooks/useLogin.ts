@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { LoginContext } from "../context/AuthContext";
-import { LoginContextType } from "../types/LoginTypes";
+import { GlobalContextType } from "../types/GlobalTypes";
+import { AuthType } from "../types/UserTypes";
 
 
-export default (): LoginContextType => {
-  const context = useContext<LoginContextType>(LoginContext)
+export default (): GlobalContextType<AuthType> => {
+  const context = useContext<GlobalContextType<AuthType>>(LoginContext)
 
   return context
 }

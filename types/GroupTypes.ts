@@ -7,4 +7,7 @@ export type GroupType = {
   users?: string[],
   photoUrl?: string,
   latestMessage?: string,
+  isRead?: boolean
 }
+
+

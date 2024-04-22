@@ -1,89 +1,94 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity, ScrollView } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
-import { db, usersRef } from "../configs/firebaseConfig";
-import { onSnapshot, query, where, collection, getDocs, getDoc, doc } from "@firebase/firestore";
 import useLogin from "../hooks/useLogin";
+import useUsers, { UserCtx } from "../hooks/useUsers";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
-import { ConvertDateToString } from "../utils/time";
-import { fetchUsers } from "../api/users";
-import { fetchGroups } from "../api/groups";
+import { fetchGroups, updateReadGroup } from "../api/groups";
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
+import Loading from '../screens/Loading'
+import useGroups from "../hooks/useGroups";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ChatScreen = ({ navigation }) => {
   const isFocused = useIsFocused()
 
   const { state: currentUser } = useLogin()
-  const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
+  const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
+  console.log(currentGroups?.data)
 
 
   useEffect(() => {
 
     if (isFocused) {
-
-      fetchGroups({ exclude: false, userid: currentUser.data.id }, setGroups)
-
+      fetchGroups({ userid: currentUser.data.id }, { dispatchGroups, dispatchUser })
     }
 
-    // return () => unsub()
-  }, [isFocused, currentUser]);
+
+  }, [isFocused]);
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
   const renderItem = ({ item }, navigation) => {
+    console.log("isread:", item?.isRead)
 
     return (
+      <>
 
-      <ListItem
-        key={item.id}
-        bottomDivider
-        onPress={() => {
-          // Xử lý khi người dùng chọn một người để chat
-          console.log("Start chat with group:", item.id);
-          navigation.navigate("ChatRoom", item)
-        }}
-      >
-        <Image defaultSource={profilepic} source={item.photoUrl === "" ? DEFAULT_IMAGE : { uri: item.photoUrl }} style={styles.profilePic} />
-        <ListItem.Content>
-          <ListItem.Title>{item.groupName}</ListItem.Title>
-          <ListItem.Subtitle>{item.latestMessage}</ListItem.Subtitle>
-        </ListItem.Content>
-        <ListItem.Content>
-          <ListItem.Title style={{ marginLeft: 80 }}>{item.time}</ListItem.Title>
-        </ListItem.Content>
+        <ListItem
+          key={item?.id}
+          onPress={() => {
+            // Xử lý khi người dùng chọn một người để chat
+            console.log("Start chat with group:", item?.id);
+            updateReadGroup(currentUser?.data?.id, item?.id, { dispatchUser, dispatchGroups })
+            navigation.navigate("ChatRoom", item)
+          }}
+          containerStyle={{ backgroundColor: '#222', borderBottomWidth: 1, borderColor: 'orange' }}
+        >
+          <Image defaultSource={profilepic} source={item?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: item?.photoUrl }} style={styles.profilePic} />
+          <ListItem.Content>
+            <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{item?.groupName}</ListItem.Title>
+            <ListItem.Subtitle style={{ color: 'white' }}>{item?.latestMessage}</ListItem.Subtitle>
+          </ListItem.Content>
+          <ListItem.Content>
+            <ListItem.Title style={{ color: 'white', marginLeft: 'auto' }}>{item?.time}</ListItem.Title>
+            <ListItem.Subtitle style={{ color: 'white', marginLeft: 'auto' }}>{(item?.isRead === undefined) ? "" : <MaterialCommunityIcons name="message-badge" size={24} color="orange" />}</ListItem.Subtitle>
+          </ListItem.Content>
 
-      </ListItem>
+        </ListItem>
+      </>
     )
   }
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
-
+      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 10 }}>
+        <TouchableOpacity onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
           <Image source={profilepic} style={styles.profilePic} />
-          <Text>{currentUser?.data?.displayName}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Chat Screen</Text>
+        <Text style={styles.title}>Boxes</Text>
       </View>
       <SignOutBtn />
       <View style={{ flex: 10 }}>
         {
-          groups.length ?
-            <FlatList
-              data={groups}
-              keyExtractor={(item) => item.id}
-              renderItem={(item) => renderItem(item, navigation)}
-            />
+          currentGroups?.isLoading ?
+            <Loading />
             :
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>Your history is empty. Start a group chat?</Text>
-              <TouchableOpacity>
-                <Text style={styles.btnText}>Create Group</Text>
-              </TouchableOpacity>
-            </View>
+            currentGroups?.data?.length == 0 ?
+              <View style={styles.empty}>
+                <Text style={styles.emptyText}>Your history is empty. Start a group chat?</Text>
+                <TouchableOpacity>
+                  <Text style={styles.btnText}>Create Group</Text>
+                </TouchableOpacity>
+              </View>
+              :
+              <FlatList
+                data={currentGroups?.data}
+                keyExtractor={(item) => item?.id}
+                renderItem={(item) => renderItem(item, navigation)}
+              />
         }
       </View>
     </View>
@@ -94,7 +99,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#111",
-    paddingHorizontal: 16,
     paddingTop: 32,
     marginTop: 50,
   },
@@ -102,8 +106,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: 'orange',
-    marginBottom: 16,
-    flex: 1,
   },
   profilePic: {
     objectFit: 'cover',
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'orange',
     borderRadius: 5
-  }
+  },
 });
 
 export default ChatScreen;

@@ -1,24 +1,29 @@
 import { ReactNode, createContext, useEffect, useReducer } from "react";
 import { MessageAction } from "../constants/message";
-import { State } from "../types/LoginTypes";
-import { Action, MessageContextType, MessageType } from "../types/MessageTypes";
-import useLogin from "../hooks/useLogin";
+import { Action, GlobalContextType, State } from "../types/GlobalTypes";
+import { MessageType } from "../types/MessageTypes";
 
-const initialState = {
+const initialMessageState = {
+  isLoading: false, isError: false
+}
+const initialMessagesState = {
   isLoading: false, isError: false
 }
 
-const MessageContext = createContext<MessageContextType>({
-  state: initialState,
+
+export const MessageContext = createContext<GlobalContextType<MessageType>>({
+  state: initialMessageState,
   dispatch: () => null
 })
+
+export const MessagesContext = createContext<GlobalContextType<MessageType[]>>({ state: initialMessagesState, dispatch: () => null })
 
 type MessageProviderProp = {
   children: ReactNode
 }
 
 
-const reducer = (state: State<MessageType>, action: Action<MessageType>): State<MessageType> => {
+const messageReducer = (state: State<MessageType>, action: Action<MessageAction, MessageType>): State<MessageType> => {
   switch (action.type) {
     case MessageAction.FETCH:
       return {
@@ -36,26 +41,54 @@ const reducer = (state: State<MessageType>, action: Action<MessageType>): State<
         ...state,
         isLoading: true, isError: false, data: undefined
       }
-
-    default:
+    case MessageAction.ERROR:
       return {
-        isLoading: false, isError: true, data: undefined
+        ...state,
+        isLoading: false, isError: true, error: "Error fetching messages"
+      }
+    case MessageAction.DELETE:
+      return {
+        ...state,
+        isLoading: false, isError: false, data: undefined
       }
   }
 }
 
+const messagesReducer = (state: State<MessageType[]>, action: Action<MessageAction, MessageType[]>): State<MessageType[]> => {
+  switch (action.type) {
+    case MessageAction.FETCH:
+      return {
+        ...state,
+        isLoading: false, isError: false, data: action.payload
+      }
+    case MessageAction.PENDING:
+      return {
+        ...state,
+        isLoading: true, isError: false, data: undefined
+      }
+    case MessageAction.ERROR:
+      return {
+        ...state,
+        isLoading: false, isError: true, error: "Error fetching messages"
+      }
+    case MessageAction.DELETE:
+      return {
+        ...state,
+        isLoading: false, isError: false, data: undefined
+      }
+  }
+}
 
 export default function MessageProvider({ children }: MessageProviderProp) {
-  const { state: userState } = useLogin()
-  const [messageState, dispatch] = useReducer(reducer, initialState)
+  const [messageState, dispatchMessage] = useReducer(messageReducer, initialMessageState)
+  const [messagesState, dispatchMessages] = useReducer(messagesReducer, initialMessagesState)
 
-  useEffect(() => {
-
-  }, [userState])
 
   return (
-    <MessageContext.Provider value={{ state: messageState, dispatch }}>
-      {children}
+    <MessageContext.Provider value={{ state: messageState, dispatch: dispatchMessage }}>
+      <MessagesContext.Provider value={{ state: messagesState, dispatch: dispatchMessages }}>
+        {children}
+      </MessagesContext.Provider>
     </MessageContext.Provider>
   )
 }

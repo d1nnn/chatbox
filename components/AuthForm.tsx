@@ -1,22 +1,8 @@
 import React, { useRef } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
-import { Dimensions, ScrollView, TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { Dimensions, ScrollView, TouchableOpacity, View, Text, StyleSheet, Image } from "react-native";
 import { NavigationProp } from "../props/Navigation";
-// import { RootParamList } from "../navigators/MainNavigator";
-// import FormSubmitButton from "./FormSubmitButton";
-// import {
-//   Dimensions,
-//   ScrollView,
-//   TouchableOpacity,
-//   View,
-//   Text,
-//   StyleSheet,
-// } from "react-native";
-
-// type ScreenProps = StackScreenProps<RootParamList>;
-
-
 const { width, height } = Dimensions.get('window')
 
 export default function AuthForm({ navigation }: NavigationProp): React.JSX.Element {
@@ -29,22 +15,8 @@ export default function AuthForm({ navigation }: NavigationProp): React.JSX.Elem
           <Text style={styles.title}>The Box</Text>
           <Text style={styles.slogan}>Connect our hearts together</Text>
         </View>
+        <Image source={require("../assets/ChatImage.png")} style={{ objectFit: 'cover', height: 120, width: 120, alignSelf: 'center' }} />
 
-        <View style={styles.selector}>
-          <TouchableOpacity
-            style={{ ...styles.selectorBtn, ...styles.loginBtn }}
-            onPress={() => scrollView.current?.scrollTo({ x: 0 })}
-          >
-            <Text style={styles.selectorText}>Login</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{ ...styles.selectorBtn, ...styles.signupBtn }}
-            onPress={() => scrollView.current?.scrollTo({ x: width })}
-          >
-            <Text style={styles.selectorText}>Sign up</Text>
-          </TouchableOpacity>
-        </View>
 
         <View>
           <ScrollView
@@ -52,8 +24,8 @@ export default function AuthForm({ navigation }: NavigationProp): React.JSX.Elem
             ref={scrollView}
             horizontal
             showsHorizontalScrollIndicator={false}>
-            <LoginForm navigation={navigation} />
-            <SignupForm />
+            <LoginForm goToSignUp={() => scrollView.current?.scrollTo({ x: width })} />
+            <SignupForm goToLogin={() => scrollView.current?.scrollTo({ x: 0 })} />
           </ScrollView>
         </View>
 
@@ -65,7 +37,7 @@ export default function AuthForm({ navigation }: NavigationProp): React.JSX.Elem
 const styles = StyleSheet.create({
   container: {
     height: "100%",
-    marginTop: height / 10,
+    marginTop: 40,
   },
   loginBtn: {
     borderTopLeftRadius: 5,
@@ -95,10 +67,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
+    color: 'orange',
     fontSize: 50,
     fontWeight: "700",
   },
   slogan: {
+    color: 'white',
     fontSize: 20,
   },
 });

@@ -1,3 +1,3 @@
 export enum MessageAction {
-  FETCH = "FETCH", PENDING = "PENDING"
+  FETCH, PENDING, ERROR, DELETE
 }

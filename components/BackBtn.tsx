@@ -8,7 +8,7 @@ const { width, height } = Dimensions.get('window')
 export default function BackBtn({ navigation }: NavigationProp): React.JSX.Element {
 
   function goBack() {
-    navigation?.goBack()
+    navigation?.navigate("Home")
   }
 
   return (

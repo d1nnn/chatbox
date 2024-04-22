@@ -1,6 +1,14 @@
+export enum AuthAction {
+  PENDING,
+  LOGIN,
+  UPDATE,
+  LOGOUT,
+  ERROR,
+}
+
 export enum UserAction {
-  PENDING = 'PENDING',
-  LOGIN = 'LOGIN',
-  UPDATE = 'UPDATE',
-  LOGOUT = 'LOGOUT',
+  PENDING,
+  FETCH,
+  DELETE,
+  ERROR
 }

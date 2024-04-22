@@ -7,9 +7,10 @@ import { GroupType } from "../types/GroupTypes";
 
 interface IMessageSwipe {
   onRemove: (id: string) => void
-  data: GroupType,
+  data?: GroupType,
   length: number
   rotate: string
+  handleLatestMessage: () => void
 };
 const WIDTH_CARD = Dimensions.get('window').width * 0.85;
 const ITEM_HEIGHT = 70;
@@ -25,7 +26,7 @@ const SHADOW = {
   shadowRadius: 5,
 }
 
-const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate }) => {
+const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate, handleLatestMessage }) => {
   const swipeTranslateX = useSharedValue(0);
   const pressed = useSharedValue(false);
   const itemHeight = useSharedValue(ITEM_HEIGHT);
@@ -78,7 +79,7 @@ const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate 
     <GestureDetector gesture={pan}>
       <Animated.View>
         <Animated.View style={[transformStyle]}>
-          <NewMessage data={data} scale={1.2} length={length} rotate={rotate} />
+          <NewMessage handleLatestMessage={handleLatestMessage} data={data} scale={1.2} length={length} rotate={rotate} />
         </Animated.View>
       </Animated.View>
     </GestureDetector>

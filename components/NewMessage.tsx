@@ -10,13 +10,14 @@ type NewMessageProp = {
   length: number,
   rotate: string
   scale: number
-  data: GroupType
+  data?: GroupType
+  handleLatestMessage: () => void
 }
 
 const { width, height } = Dimensions.get('window')
 
 
-export default function NewMessage({ length, rotate, scale, data }: NewMessageProp): React.JSX.Element {
+export default function NewMessage({ length, rotate, scale, data, handleLatestMessage }: NewMessageProp): React.JSX.Element {
   const navigation = useContext(NavigationContext)
   const [isRendered, setIsRendered] = useState<boolean>(false)
 
@@ -25,6 +26,7 @@ export default function NewMessage({ length, rotate, scale, data }: NewMessagePr
 
   function goToMessage() {
     const group: any = data
+    handleLatestMessage()
     navigation?.navigate("ChatRoom", group)
   }
 

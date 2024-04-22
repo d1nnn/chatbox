@@ -1,5 +1,5 @@
 import { collection, doc, onSnapshot, query, where } from "@firebase/firestore";
-import { UserType } from "../types/LoginTypes";
+import { UserType } from "../types/UserTypes";
 import { db } from "../configs/firebaseConfig";
 import useLogin from "../hooks/useLogin";
 import { CurrentUserOption } from "../types/Options";
@@ -11,7 +11,6 @@ export function fetchUsersFromGroup(groupid: string, option: CurrentUserOption, 
 
   onSnapshot(groupQuery, (groupDoc) => {
     let groupResult = groupDoc.data()
-    console.log("groupResult: ", groupResult)
     const userQuery = query(collection(db, "users"), where("id", "in", groupResult?.users))
     // const userQuery = query(collection(db, "users"), where("id", "in", ["", ""]))
 
@@ -20,14 +19,11 @@ export function fetchUsersFromGroup(groupid: string, option: CurrentUserOption, 
         let userResult = doc.data()
         if (option.exclude && userResult.id == option.userid)
           return
-        userList.push(userResult)
+        userList.push(userResult as UserType)
       })
 
       if (handleUsers)
         handleUsers(userList)
-
-
-      console.log("size: ", userSnapshot.size)
     })
   })
 
@@ -49,7 +45,7 @@ export function fetchUsers(
   onSnapshot(userQuery, userSnapshot => {
     userSnapshot.forEach(doc => {
       const userResult = doc.data()
-      userList.push(userResult)
+      userList.push(userResult as UserType)
     })
 
     if (handleUsers) {

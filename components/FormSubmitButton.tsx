@@ -1,30 +1,36 @@
-import {useState} from 'react'
-import { TouchableOpacity, Text, StyleSheet } from 'react-native'
+import React from "react";
+import { StyleSheet, Text, TextInput, TouchableNativeFeedback, TouchableOpacity, View } from "react-native";
 
-type ButtonProps = {
+type FormSubmitButtonType = {
   label: string,
   onPress: () => void
 }
 
+export default function FormSubmitButton({ label, onPress }: FormSubmitButtonType): React.JSX.Element {
 
-
-export default function FormSubmitButton({label, onPress}: ButtonProps) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}><Text style={styles.text}>{label}</Text></TouchableOpacity>
+    <TouchableOpacity style={styles.touchable} onPress={onPress}>
+      <Text style={styles.text}>
+        {label}
+      </Text>
+    </TouchableOpacity>
   )
 }
 
 const styles = StyleSheet.create({
-  button: {
-    padding: 10,
-    borderRadius: 7,
-    backgroundColor: '#0275d8',
-    marginTop: 15,
+  touchable: {
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   text: {
-    color: '#fff',
+    padding: 10,
+    color: "#222",
+    backgroundColor: 'orange',
+    width: "100%",
     textAlign: 'center',
-    fontWeight: "600",
-    fontSize: 20
+    fontSize: 16,
+    fontWeight: '600',
+    borderRadius: 5,
+    marginTop: 20,
   }
 })

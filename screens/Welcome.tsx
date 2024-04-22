@@ -12,7 +12,7 @@ export default function Welcome({ navigation }: NavigationProp): React.JSX.Eleme
   return (
     <View style={styles.container}>
       <Text>THIS IS WELCOME PAGE</Text>
-      <TouchableWithoutFeedback onPress={navigateToLogin}><Text>Start chatting</Text></TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={navigateToLogin}><Text style={styles.textStyle}>Start chatting</Text></TouchableWithoutFeedback>
     </View>
   )
 }
@@ -27,5 +27,6 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: 'orange',
     color: 'black',
+    borderRadius: 10,
   }
 })

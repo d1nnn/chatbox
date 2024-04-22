@@ -3,7 +3,7 @@ import React from "react";
 import firebaseApi from '../configs/firebaseConfig'
 import { StyleSheet } from "react-native";
 import useLogin from "../hooks/useLogin";
-import { UserAction } from "../constants/user";
+import { AuthAction } from "../constants/user";
 
 export function CustomDrawerContent(props: any): React.JSX.Element {
   const { state, dispatch } = useLogin()
@@ -11,7 +11,7 @@ export function CustomDrawerContent(props: any): React.JSX.Element {
   function signOut() {
     firebaseApi.signOut(firebaseApi.auth).then(() => {
       console.log("Logged out")
-      dispatch({ type: UserAction.LOGOUT })
+      dispatch({ type: AuthAction.LOGOUT })
       props.navigation.navigate("Auth")
 
     }).catch(err => {
