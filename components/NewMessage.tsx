@@ -5,28 +5,38 @@ import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reani
 import Animated from "react-native-reanimated";
 import { GroupType } from "../types/GroupTypes";
 import { NavigationContext } from "@react-navigation/native";
+import useHasLatestMessage from "../hooks/useHasLatestMessage";
+import { DispatchOptions, updateReadGroup } from "../api/groups";
+import useUsers, { UserCtx } from "../hooks/useUsers";
+import useGroups from "../hooks/useGroups";
+import useLogin from "../hooks/useLogin";
 
 type NewMessageProp = {
   length: number,
   rotate: string
   scale: number
   data?: GroupType
-  handleLatestMessage: () => void
 }
 
 const { width, height } = Dimensions.get('window')
 
 
-export default function NewMessage({ length, rotate, scale, data, handleLatestMessage }: NewMessageProp): React.JSX.Element {
+export default function NewMessage({ length, rotate, scale, data }: NewMessageProp): React.JSX.Element {
   const navigation = useContext(NavigationContext)
   const [isRendered, setIsRendered] = useState<boolean>(false)
-
+  const { state: currentAuth } = useLogin()
+  const { state: currentUser, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const rotateVal = useSharedValue("0deg")
   const scaleVal = useSharedValue(0)
+  const { hasLatestMessage, handleLatestMessage } = useHasLatestMessage()
+  function handleLatest(userid: string, groupid: string, dispatchOptions: DispatchOptions) {
+    updateReadGroup(userid, groupid, { dispatchUser })
+    handleLatestMessage(false)
+  }
 
   function goToMessage() {
     const group: any = data
-    handleLatestMessage()
+    handleLatest(currentAuth?.data?.id + "", group.id, { dispatchUser })
     navigation?.navigate("ChatRoom", group)
   }
 

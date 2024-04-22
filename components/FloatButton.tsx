@@ -5,19 +5,20 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp } from "../props/Navigation";
 import { Easing, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
+import useHasLatestMessage from "../hooks/useHasLatestMessage";
 
 type FloatButtonProp = {
   position: "right" | "bottom"
   translate: "X" | "Y"
-  handleLatestMessage: () => void
 }
 
 
-export default function FloatButton({ position, translate, handleLatestMessage }: FloatButtonProp): React.JSX.Element {
+export default function FloatButton({ position, translate }: FloatButtonProp): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const translateVal = useSharedValue(0)
   const rotateVal = useSharedValue("0deg")
   const scaleVal = useSharedValue(0)
+  const { handleLatestMessage } = useHasLatestMessage()
 
   const animationStyle = useAnimatedStyle(() => ({
     transform: [
@@ -57,7 +58,7 @@ export default function FloatButton({ position, translate, handleLatestMessage }
   return (
 
     <View style={[styles.floatBtnContainer, { [position]: position === "right" ? 10 : 30, flexDirection: position === "right" ? 'row' : 'column' }]}>
-      <TouchableWithoutFeedback onPress={handleLatestMessage}>
+      <TouchableWithoutFeedback onPress={() => handleLatestMessage(false)}>
         <Animated.View
           style={[
             styles.button,

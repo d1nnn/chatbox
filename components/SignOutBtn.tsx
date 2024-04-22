@@ -1,17 +1,17 @@
 import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import firebaseApi from '../configs/firebaseConfig'
-import { AuthAction } from "../constants/user";
-import useLogin from "../hooks/useLogin";
 import useGroups from "../hooks/useGroups";
 import { GroupAction } from "../constants/group";
+import useHasLatestMessage from "../hooks/useHasLatestMessage";
+
 
 export default function SignOutBtn() {
-  const { dispatch: dispatchLogin } = useLogin()
   const { dispatch: dispatchGroups } = useGroups()
+  const { handleLatestMessage } = useHasLatestMessage()
   function signOut() {
     firebaseApi.signOut(firebaseApi.auth).then(() => {
       console.log("Logged out")
-      // dispatchLogin({ type: AuthAction.LOGOUT })
+      handleLatestMessage(false)
       dispatchGroups({ type: GroupAction.DELETE })
 
     }).catch(err => {

@@ -17,7 +17,7 @@ export function fetchUsersFromGroup(groupid: string, option: CurrentUserOption, 
     onSnapshot(userQuery, userSnapshot => {
       userSnapshot.forEach(doc => {
         let userResult = doc.data()
-        if (option.exclude && userResult.id == option.userid)
+        if (userResult.id == option.userid)
           return
         userList.push(userResult as UserType)
       })
@@ -37,7 +37,7 @@ export function fetchUsers(
   let userList: UserType[] = []
   let userQuery;
 
-  if (option.exclude)
+  if (option.userid !== "" || !option.userid)
     userQuery = query(collection(db, "users"))
   else
     userQuery = query(collection(db, "users"), where("id", "!=", option.userid))

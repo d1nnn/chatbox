@@ -13,20 +13,22 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import useUsers, { UserCtx } from "../hooks/useUsers"
 import { UserType } from "../types/UserTypes"
+import useGroups from "../hooks/useGroups"
+import useHasLatestMessage from "../hooks/useHasLatestMessage"
 
 const Tab = createBottomTabNavigator()
 
 
-export default function BottomTabNavigator() {
+export default function BottomTabNavigator({ }: any) {
   const [messages, setMessages] = useState<MessageType | null>();
-  const [hasLatestMessage, setHasLatestMessage] = useState<boolean>(true)
+  const { state: currentGroups } = useGroups()
+  const { hasLatestMessage, handleLatestMessage } = useHasLatestMessage()
 
 
   return (
-    !messages && hasLatestMessage ?
-      <LatestMessage handleLatestMessage={() => {
-        setHasLatestMessage(false)
-      }} />
+    hasLatestMessage ?
+
+      <LatestMessage />
       :
       <Tab.Navigator screenOptions={{
         headerShown: true,
@@ -45,7 +47,7 @@ export default function BottomTabNavigator() {
 
         initialRouteName="ChatScreen"
       >
-        <Tab.Screen component={ChatScreen} name="Boxes" options={{
+        <Tab.Screen children={props => <ChatScreen  {...props} />} name="Boxes" options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="alpha-b-box-outline" size={24} color={color} />
           ),

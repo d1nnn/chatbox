@@ -10,7 +10,6 @@ interface IMessageSwipe {
   data?: GroupType,
   length: number
   rotate: string
-  handleLatestMessage: () => void
 };
 const WIDTH_CARD = Dimensions.get('window').width * 0.85;
 const ITEM_HEIGHT = 70;
@@ -26,7 +25,7 @@ const SHADOW = {
   shadowRadius: 5,
 }
 
-const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate, handleLatestMessage }) => {
+const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate, }) => {
   const swipeTranslateX = useSharedValue(0);
   const pressed = useSharedValue(false);
   const itemHeight = useSharedValue(ITEM_HEIGHT);
@@ -79,7 +78,7 @@ const MessageSwipe: React.FC<IMessageSwipe> = ({ onRemove, data, length, rotate,
     <GestureDetector gesture={pan}>
       <Animated.View>
         <Animated.View style={[transformStyle]}>
-          <NewMessage handleLatestMessage={handleLatestMessage} data={data} scale={1.2} length={length} rotate={rotate} />
+          <NewMessage data={data} scale={1.2} length={length} rotate={rotate} />
         </Animated.View>
       </Animated.View>
     </GestureDetector>

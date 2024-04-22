@@ -11,28 +11,31 @@ import Loading from '../screens/Loading'
 import useGroups from "../hooks/useGroups";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+
+
 const ChatScreen = ({ navigation }) => {
   const isFocused = useIsFocused()
 
   const { state: currentUser } = useLogin()
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
-  console.log(currentGroups?.data)
 
 
   useEffect(() => {
 
     if (isFocused) {
-      fetchGroups({ userid: currentUser.data.id }, { dispatchGroups, dispatchUser })
+      var unsubPromise = fetchGroups({ dispatchGroups, dispatchUser }, { userid: currentUser.data.id },)
     }
 
+    return () => {
+      unsubPromise?.then(unsub => unsub())
+    }
 
   }, [isFocused]);
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
   const renderItem = ({ item }, navigation) => {
-    console.log("isread:", item?.isRead)
 
     return (
       <>

@@ -12,6 +12,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
 
 const { width, height } = Dimensions.get('window')
+const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
 export default function ChatRoom({ navigation, route }: NavigationProp): React.JSX.Element {
   const [messages, setMessages] = useState<MessageType[]>([])
@@ -57,7 +58,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
                 style={[styles.messageContainer,
                 (m.userid === currentUser?.data?.id) && styles.messageContainerRight]}
               >
-                {currentUser?.data?.id != m.userid && <Image source={{ uri: m.user?.photoUrl + "" }} style={{ height: 48, width: 48, borderRadius: 48 / 2 }} />}
+                {currentUser?.data?.id != m.userid && <Image source={m.user?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: m.user?.photoUrl + "" }} style={{ height: 48, width: 48, borderRadius: 48 / 2 }} />}
                 <Text style={[styles.messageText, m.userid === currentUser?.data?.id && { backgroundColor: 'orange' }]}>{m.content}</Text>
               </View>
             )

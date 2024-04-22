@@ -15,8 +15,8 @@ export type DispatchOptions = {
 }
 
 export async function fetchGroups(
+  dispatchOptions: DispatchOptions,
   option: CurrentUserOption,
-  dispatchOptions: DispatchOptions
 
 ): Promise<Unsubscribe> {
   const { dispatchGroups, dispatchUser } = dispatchOptions
@@ -28,13 +28,7 @@ export async function fetchGroups(
 
   if (option && option.userid) {
     groupQuery = query(collection(db, "groups"), where("users", "array-contains", option.userid))
-    const userRef = doc(db, "users", option.userid)
-    const userSnapshot = await getDoc(userRef)
-    userResult = userSnapshot.data() as UserType
-    if (dispatchUser)
-      dispatchUser({ type: UserAction.FETCH, payload: userResult })
   } else {
-
     groupQuery = query(collection(db, "groups"));
   }
 
@@ -42,6 +36,14 @@ export async function fetchGroups(
 
   let unsub = onSnapshot(groupQuery, async (groupSnapshot: any) => {
     let groupList: GroupType[] = []
+    if (option && option.userid) {
+      const userRef = doc(db, "users", option.userid)
+      const userSnapshot = await getDoc(userRef)
+      userResult = userSnapshot.data() as UserType
+
+    }
+    if (dispatchUser)
+      dispatchUser({ type: UserAction.FETCH, payload: userResult })
 
     let futureGroup = groupSnapshot.docs.map(async (groupdoc: any) => {
       let groupResult = groupdoc.data()
@@ -58,7 +60,8 @@ export async function fetchGroups(
 
       groupResult.latestMessage = messageResult?.content
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
-      const unreadGroup = userResult.unread?.find(u => u.groupid === groupResult.id)
+      console.log(userResult)
+      const unreadGroup = userResult?.unread?.find(u => u.groupid === groupResult.id)
       groupResult.isRead = unreadGroup?.isRead
 
 
@@ -117,6 +120,7 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
     }
   })
+  console.log("UNSU", unsub)
   return unsub
 }
 
@@ -132,7 +136,6 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
       if (u.groupid == groupid)
         return null
     }).filter((u: any) => u !== null)
-    console.log("newUnread: ", newUnread)
     try {
       await updateDoc(userRef, {
         unread: newUnread

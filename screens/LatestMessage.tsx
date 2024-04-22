@@ -13,22 +13,17 @@ import { GroupAction } from '../constants/group'
 import Loading from './Loading'
 import { UserType } from '../types/UserTypes'
 import useUsers, { UserCtx } from '../hooks/useUsers'
+import useHasLatestMessage from '../hooks/useHasLatestMessage'
 
-type LatestMessageProp = {
-  handleLatestMessage: () => void
-}
 
 const { width, height } = Dimensions.get('window')
-export default function LatestMessage({ handleLatestMessage, navigation }: LatestMessageProp & NavigationProp): React.JSX.Element {
+export default function LatestMessage({ navigation }: NavigationProp): React.JSX.Element {
   const { state: currentUser } = useLogin()
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
   const isFocused = useIsFocused()
+  const { hasLatestMessage, handleLatestMessage } = useHasLatestMessage()
 
-  function handleLatestWithUnreadGroup(userid: string, groupid: string, dispatchOptions: DispatchOptions) {
-    updateReadGroup(userid, groupid, dispatchOptions)
-    handleLatestMessage()
-  }
 
   function removeMessage(id: string) {
     if (!id)
@@ -40,18 +35,21 @@ export default function LatestMessage({ handleLatestMessage, navigation }: Lates
   useEffect(() => {
     if (isFocused) {
       if (currentUser && currentUser.data) {
-        fetchUnreadGroups(currentUser.data.id as string, { dispatchUser, dispatchGroups }).then(() => {
-          if (!currentGroups?.data?.length) {
+        var unsubPromise = fetchUnreadGroups(currentUser.data.id as string, { dispatchUser, dispatchGroups }).then((unsub) => {
+          if (!currentGroups?.data?.length && !hasLatestMessage) {
             navigation?.navigate("Home")
-            handleLatestMessage()
           }
+          return unsub
         })
       }
     }
+
+    return () => {
+      unsubPromise?.then(unsub => unsub())
+    }
   }, [isFocused])
 
-  console.log("LatestMessage length: ", currentGroups?.data?.length)
-  console.log("LatestMessage: ", currentGroups?.data)
+
 
   return (
     <GestureHandlerRootView style={{ width, height }}>
@@ -61,15 +59,12 @@ export default function LatestMessage({ handleLatestMessage, navigation }: Lates
             <Loading />
             :
             currentGroups?.data?.length ? currentGroups?.data.slice(0, 2).map((group, i) => (
-              <MessageSwipe handleLatestMessage={() => {
-                handleLatestWithUnreadGroup(currentUser?.data?.id as string, group.id + "", { dispatchUser, dispatchGroups })
-                handleLatestMessage()
-              }} length={group?.latestMessage?.length ?? 0} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={group} onRemove={removeMessage} key={i} />
+              <MessageSwipe length={group?.latestMessage?.length ?? 0} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={group} onRemove={removeMessage} key={i} />
             )) :
-              <MessageSwipe handleLatestMessage={handleLatestMessage} length={currentGroups?.data?.length ?? 0} rotate="0deg" data={currentGroups?.data && currentGroups?.data[0]} onRemove={removeMessage} />
+              <MessageSwipe length={currentGroups?.data?.length ?? 0} rotate="0deg" data={currentGroups?.data && currentGroups?.data[0]} onRemove={removeMessage} />
 
         }
-        <FloatButton position={(currentGroups?.data?.length ?? 0) >= 2 ? "right" : "bottom"} translate={(currentGroups?.data?.length ?? 0) >= 2 ? "X" : "Y"} handleLatestMessage={() => handleLatestMessage()} />
+        <FloatButton position={(currentGroups?.data?.length ?? 0) >= 2 ? "right" : "bottom"} translate={(currentGroups?.data?.length ?? 0) >= 2 ? "X" : "Y"} />
       </View >
     </GestureHandlerRootView>
   )

@@ -6,6 +6,7 @@ import Loading from "../screens/Loading";
 import Welcome from "../screens/Welcome";
 import ChatRoom from "../screens/ChatRoom";
 import GroupsProvider from "../context/GroupsContext";
+import LatestMessageProvider from "../context/LatestMessageContext";
 
 
 export type RootParamList = {
@@ -29,7 +30,12 @@ const StackNavigator = (): React.JSX.Element => {
         {
           state?.data ?
             <>
-              <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
+              <Stack.Screen children={
+                (props) =>
+                  <LatestMessageProvider>
+                    <BottomTabNavigator {...props} />
+                  </LatestMessageProvider>
+              } name="Home"></Stack.Screen>
               <Stack.Screen component={ChatRoom} name="ChatRoom" />
             </>
             : <>
