@@ -11,43 +11,57 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatScreen from "../screens/ChatScreen";
 import { useState } from "react";
 import { MessageType } from "../types/MessageTypes";
+import Profile from "../screens/Profile";
+import MiniProfile from "../screens/MiniProfile";
+import Friends from "../screens/Friends";
 
+interface Friend {
+  id: number;
+  name: any;
+  message: any;
+  avatar: any;
+}
 
 export type RootParamList = {
-  Home: undefined
-  About: undefined
-  Auth: undefined
-  Welcome: undefined
-  LatestMessage: undefined
+  Home: undefined;
+  About: undefined;
+  Auth: undefined;
+  Welcome: undefined;
+  LatestMessage: undefined;
   ChatScreen: undefined;
-}
-const Stack = createStackNavigator<RootParamList>()
-
+  MiniProfile: { friend: Friend };
+  Friends: undefined;
+};
+const Stack = createStackNavigator<RootParamList>();
 
 const StackNavigator = (): React.JSX.Element => {
-  const { state } = useLogin()
+  const { state } = useLogin();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {
-        state.data ?
-          <>
-            <Stack.Screen component={BottomTabNavigator} name="Home"></Stack.Screen>
-          </>
-          : <>
-            <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>
-            <Stack.Screen component={Login} name="Auth"></Stack.Screen>
-          </>
-      }
+      {state.data ? (
+        <>
+          <Stack.Screen
+            component={BottomTabNavigator}
+            name="Home"
+          ></Stack.Screen>
+          <Stack.Screen
+            component={MiniProfile}
+            name="MiniProfile"
+          ></Stack.Screen>
+        </>
+      ) : (
+        <>
+          <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>
+          <Stack.Screen component={Login} name="Auth"></Stack.Screen>
+          <Stack.Screen component={Friends} name="Friends"></Stack.Screen>
+        </>
+      )}
     </Stack.Navigator>
   );
 };
 
 export default function MainNavigator(): React.JSX.Element {
-  const { state } = useLogin()
-  if (state.isLoading)
-    return <Loading />
-  else
-    return (
-      <StackNavigator />
-    )
+  const { state } = useLogin();
+  if (state.isLoading) return <Loading />;
+  else return <StackNavigator />;
 }

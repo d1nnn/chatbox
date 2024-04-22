@@ -1,5 +1,8 @@
 import { useState } from "react";
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { NavigationProp } from "../props/Navigation";
 
 import {
   Text,
@@ -11,14 +14,31 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-export default function Friends(): React.JSX.Element {
+interface Friend {
+  id: number;
+  name: any;
+  message: any;
+  avatar: any;
+}
+
+// type NavigationProp = StackNavigationProp<RootStackParamList>;
+// type RootStackParamList = {
+//   MiniProfile: { friend: Friend };
+// };
+
+export default function Friends({
+  navigation,
+}: NavigationProp): React.JSX.Element {
   const [searchText, setSearchText] = useState("");
-  // Hàm xử lý sự kiện khi nút Xóa All được nhấn
+
   const handleClearSearch = () => {
     setSearchText("");
   };
 
-  // Dữ liệu danh sách bạn bè và nhóm
+  const handleFriendPress = (friend: Friend) => {
+    navigation?.navigate("MiniProfile", { friend });
+  };
+
   const friendsData = [
     {
       id: 1,
@@ -32,13 +52,6 @@ export default function Friends(): React.JSX.Element {
       message: "How are you?",
       avatar: require("../assets/images (1).jpg"),
     },
-    {
-      id: 3,
-      name: "Friend 3",
-      message: "Let's meet up!",
-      avatar: require("../assets/images (1).jpg"),
-    },
-    // Thêm các bạn bè khác vào đây
   ];
 
   const groupsData = [
@@ -54,13 +67,6 @@ export default function Friends(): React.JSX.Element {
       activity: "Last activity: 3 hours ago",
       avatar: require("../assets/f325581f9612cdc77538f205e66a3d3f.jpg"),
     },
-    {
-      id: 3,
-      name: "Group 3",
-      activity: "Last activity: 30 minutes ago",
-      avatar: require("../assets/f325581f9612cdc77538f205e66a3d3f.jpg"),
-    },
-    // Thêm các nhóm khác vào đây
   ];
 
   return (
@@ -87,13 +93,15 @@ export default function Friends(): React.JSX.Element {
           data={friendsData}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Image source={item.avatar} style={styles.profilePic} />
-              <View>
-                <Text style={styles.friendName}>{item.name}</Text>
-                <Text style={styles.friendMessage}>{item.message}</Text>
+            <TouchableOpacity onPress={() => handleFriendPress(item)}>
+              <View style={styles.itemContainer}>
+                <Image source={item.avatar} style={styles.profilePic} />
+                <View>
+                  <Text style={styles.friendName}>{item.name}</Text>
+                  <Text style={styles.friendMessage}>{item.message}</Text>
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </View>
@@ -134,7 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   searchInput: {
-    width: "70%",
+    width: "80%",
     backgroundColor: "#eee",
     borderRadius: 8,
     paddingHorizontal: 16,
