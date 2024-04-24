@@ -10,34 +10,41 @@ import { fetchUsersFromGroup } from "../api/users";
 import { UserType } from "../types/UserTypes";
 import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
+import useUsers, { UserCtx } from "../hooks/useUsers";
+import { GroupType } from "../types/GroupTypes";
+import { getGroupName } from "../api/groups";
 
 const { width, height } = Dimensions.get('window')
 const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
 export default function ChatRoom({ navigation, route }: NavigationProp): React.JSX.Element {
   const [messages, setMessages] = useState<MessageType[]>([])
-  const [users, setUsers] = useState<UserType[] | null>()
+  const { state: currentUsers, dispatch: dispatchUsers } = useUsers(UserCtx.UsersType)
   const { state: currentUser } = useLogin()
   const isFocused = useIsFocused()
   const [textInput, setTextInput] = useState<string>("")
   const scrollViewRef = useRef<ScrollView>(null)
+  const [group, setGroup] = useState<GroupType>(route?.params as GroupType)
+  const [groupName, setGroupName] = useState<string>("")
 
+  console.log("groupname: ", groupName)
 
   const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
-    const group: any = route?.params
-    const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id, createdAt: Timestamp.now().toDate() })
+    const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id + "", createdAt: Timestamp.now().toDate() })
     setTextInput("")
   }
 
+
   useEffect(() => {
     if (isFocused) {
-      const group: any = route?.params
 
       if (currentUser && currentUser.data)
-        fetchUsersFromGroup(group?.id, { userid: currentUser.data.id }, setUsers)
+        fetchUsersFromGroup(group?.id as string, { userid: currentUser.data.id }, dispatchUsers)
 
-      fetchMessagesCallback(group?.id, setMessages)
+      fetchMessagesCallback(group?.id as string, setMessages)
+
+      getGroupName(currentUser?.data?.id + "", group).then((groupName) => setGroupName(groupName))
     }
 
 
@@ -47,6 +54,9 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
     <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1 }}>
       <BackBtn navigation={navigation} />
       <View style={styles.container}>
+        <View style={styles.groupInfo}>
+          <Text style={styles.groupName}>{groupName}</Text>
+        </View>
         <ScrollView contentContainerStyle={styles.messages} ref={scrollViewRef} onContentSizeChange={() => { scrollViewRef.current?.scrollToEnd() }}>
           {
             messages
@@ -124,4 +134,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     borderRadius: 20,
   },
+  groupInfo: {
+    backgroundColor: '#111',
+    zIndex: 3,
+    position: 'absolute',
+    top: 0,
+    width,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  groupName: {
+    color: 'orange',
+    fontSize: 20,
+    fontWeight: '700',
+  }
 })

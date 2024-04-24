@@ -5,12 +5,12 @@ import useLogin from "../hooks/useLogin";
 import useUsers, { UserCtx } from "../hooks/useUsers";
 import profilepic from "../assets/profilepic.png"
 import SignOutBtn from "../components/SignOutBtn"
-import { fetchGroups, updateReadGroup } from "../api/groups";
+import { fetchGroups, getGroupName, updateReadGroup } from "../api/groups";
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import Loading from '../screens/Loading'
 import useGroups from "../hooks/useGroups";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 const ChatScreen = ({ navigation }) => {
@@ -19,12 +19,14 @@ const ChatScreen = ({ navigation }) => {
   const { state: currentUser } = useLogin()
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
+  const [groupName, setGroupName] = useState("")
 
 
   useEffect(() => {
 
     if (isFocused) {
       var unsubPromise = fetchGroups({ dispatchGroups, dispatchUser }, { userid: currentUser.data.id },)
+
     }
 
     return () => {
@@ -35,7 +37,10 @@ const ChatScreen = ({ navigation }) => {
 
   const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
-  const renderItem = ({ item }, navigation) => {
+  const renderItem = ({ item }, navigation, userid, groupName, setGroupName) => {
+
+
+    getGroupName(userid, item).then(gName => { setGroupName(gName) })
 
     return (
       <>
@@ -52,7 +57,7 @@ const ChatScreen = ({ navigation }) => {
         >
           <Image defaultSource={profilepic} source={item?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: item?.photoUrl }} style={styles.profilePic} />
           <ListItem.Content>
-            <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{item?.groupName}</ListItem.Title>
+            <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{groupName}</ListItem.Title>
             <ListItem.Subtitle style={{ color: 'white' }}>{item?.latestMessage}</ListItem.Subtitle>
           </ListItem.Content>
           <ListItem.Content>
@@ -72,6 +77,7 @@ const ChatScreen = ({ navigation }) => {
           <Image source={profilepic} style={styles.profilePic} />
         </TouchableOpacity>
         <Text style={styles.title}>Boxes</Text>
+        <MaterialIcons name="library-add" size={28} color="orange" style={{ marginLeft: 'auto', marginRight: 20 }} onPress={() => { navigation.navigate("CreateGroup") }} />
       </View>
       <SignOutBtn />
       <View style={{ flex: 10 }}>
@@ -90,7 +96,7 @@ const ChatScreen = ({ navigation }) => {
               <FlatList
                 data={currentGroups?.data}
                 keyExtractor={(item) => item?.id}
-                renderItem={(item) => renderItem(item, navigation)}
+                renderItem={(item) => renderItem(item, navigation, currentUser?.data?.id + "", groupName, setGroupName)}
               />
         }
       </View>

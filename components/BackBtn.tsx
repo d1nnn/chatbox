@@ -23,7 +23,7 @@ export default function BackBtn({ navigation }: NavigationProp): React.JSX.Eleme
 const styles = StyleSheet.create({
   backBtnContainer: {
     position: 'absolute',
-    top: 50,
+    top: 52,
     padding: 10,
     alignItems: 'flex-start',
     justifyContent: 'flex-start',

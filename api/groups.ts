@@ -157,3 +157,33 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
   }
 
 }
+
+export async function getGroupName(currentUserId: string, group: GroupType): Promise<string> {
+  if (group?.groupName && group.groupName as string !== "")
+    return group.groupName
+  let groupName = ""
+  console.log("currentuserid: ", currentUserId)
+
+  let usersQuery = query(collection(db, "users"), where("groupids", "array-contains", group?.id))
+
+  try {
+    const usersSnapshot = await getDocs(usersQuery)
+
+    usersSnapshot.docs.map((userdoc, i) => {
+      const userResult = userdoc.data()
+      if (group.quantity == 2) {
+        if (currentUserId === userResult?.id)
+          return
+      }
+
+
+      groupName += userResult?.displayName
+      groupName += ", "
+      console.log("groupName inside userSnapshot", groupName)
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  groupName = groupName.substring(0, groupName.length - 2)
+  return groupName
+}

@@ -56,20 +56,6 @@ export async function addMessage(payload: AddMessageType): Promise<string> {
   }
 
 
-  // usersSnapshot.forEach(userdoc => {
-  //   let usersResult = userdoc.data()
-  //   let userRef = doc(db, "users", usersResult.id)
-  //   let futureUser
-  //   updateDoc(userRef, {
-  //     unread: {
-  //       groupid: payload.groupid,
-  //       isRead: false,
-  //     }
-  //   }).then(() => { }).catch(err => console.error(err))
-  // })
-
-
-
   const result = await addDoc(messagesRef, payload)
   await updateDoc(updateGroupMessageRef, {
     messages: arrayUnion(result.id),
@@ -109,7 +95,7 @@ export function fetchMessage(messageId: string, handleMessages?: Dispatch<SetSta
   return unsub
 }
 
-export function fetchUnreadMessages(handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
+function fetchUnreadMessages(handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
   var messagesQuery = query(collection(db, "messages"), where("isRead", "==", false), orderBy("createdAt", "desc"), limit(5))
   var unsub = onSnapshot(messagesQuery, async messageSnapshot => {
     const futureMessages = messageSnapshot.docs.map(async (messageDoc) => {
