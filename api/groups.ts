@@ -1,4 +1,4 @@
-import { DocumentData, Query, collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, where } from "@firebase/firestore";
+import { DocumentData, Query, Timestamp, addDoc, arrayUnion, collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where } from "@firebase/firestore";
 import { GroupType } from "../types/GroupTypes";
 import { CurrentUserOption } from "../types/Options";
 import { db } from "../configs/firebaseConfig";
@@ -8,7 +8,9 @@ import { Dispatch } from "react";
 import { GroupAction } from "../constants/group";
 import { UserType } from "../types/UserTypes";
 import { UserAction } from "../constants/user";
-
+import { v4 as uuidv4 } from 'uuid'
+import { addMessage } from "./messages";
+import "react-native-get-random-values"
 
 export type DispatchOptions = {
   [key: string]: Dispatch<any>
@@ -63,6 +65,7 @@ export async function fetchGroups(
       console.log(userResult)
       const unreadGroup = userResult?.unread?.find(u => u.groupid === groupResult.id)
       groupResult.isRead = unreadGroup?.isRead
+      groupResult.groupName = await getGroupName(option.userid as string, groupResult)
 
 
       return groupResult
@@ -72,6 +75,7 @@ export async function fetchGroups(
     if (dispatchGroups) {
       dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
     }
+    console.log("dispatched groupList:", groupList)
   })
 
   return unsub
@@ -124,7 +128,47 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
   return unsub
 }
 
-export function createGroup() { }
+type CreateGroupType = {
+  currentUserid: string
+  groupName: string,
+  message: string,
+  quantity: number,
+  otherUsers: string[]
+}
+
+const groupPhotoUrl = "https://res.cloudinary.com/dhzsuo26a/image/upload/v1713499740/group-2517429_1280_gnbi1y.png"
+
+export async function createGroup(
+  {
+    currentUserid,
+    groupName,
+    message,
+    quantity,
+    otherUsers
+  }: CreateGroupType): Promise<GroupType> {
+  let uid = uuidv4()
+  let groupRef = doc(db, "groups", uid)
+
+  const allUsers = [...otherUsers, currentUserid]
+
+
+  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity, users: allUsers, photoUrl: groupPhotoUrl })
+
+  await addMessage({ groupid: uid, userid: currentUserid, isFile: false, content: message, createdAt: Timestamp.now().toDate() })
+
+  allUsers.map(async (u) => {
+    const userRef = doc(db, "users", u)
+    await updateDoc(userRef, {
+      groupids: arrayUnion(uid)
+    })
+  })
+
+
+
+  const groupResult = (await getDoc(doc(db, "groups", uid))).data()
+
+  return groupResult as GroupType
+}
 
 export async function updateReadGroup(userid: string, groupid: string, dispatchOptions: DispatchOptions) {
   const { dispatchUser, dispatchGroups } = dispatchOptions

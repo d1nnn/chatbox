@@ -4,17 +4,19 @@ import AuthProvider from './context/AuthContext'
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import MainNavigator from './navigators/MainNavigator';
 import MessageProvider from './context/MessageContext';
+import { NativeBaseProvider } from 'native-base';
 
 export default function App() {
-  const scheme = useColorScheme()
   return (
-    <AuthProvider>
-      <MessageProvider>
-        <NavigationContainer theme={DarkTheme}>
-          <MainNavigator />
-        </NavigationContainer>
-      </MessageProvider>
-    </AuthProvider>
+    <NativeBaseProvider>
+      <AuthProvider>
+        <MessageProvider>
+          <NavigationContainer theme={DarkTheme}>
+            <MainNavigator />
+          </NavigationContainer>
+        </MessageProvider>
+      </AuthProvider>
+    </NativeBaseProvider>
   );
 }
 

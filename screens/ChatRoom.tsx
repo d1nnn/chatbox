@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Image, NativeSyntheticEvent, TextInputChangeEventData, Pressable } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { NavigationProp } from "../props/Navigation";
 import { MessageType } from "../types/MessageTypes";
 import useLogin from "../hooks/useLogin";
@@ -13,9 +13,9 @@ import { Timestamp } from "@firebase/firestore";
 import useUsers, { UserCtx } from "../hooks/useUsers";
 import { GroupType } from "../types/GroupTypes";
 import { getGroupName } from "../api/groups";
+import ProfileImage from "../components/ProfileImage";
 
 const { width, height } = Dimensions.get('window')
-const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
 export default function ChatRoom({ navigation, route }: NavigationProp): React.JSX.Element {
   const [messages, setMessages] = useState<MessageType[]>([])
@@ -29,7 +29,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
 
   console.log("groupname: ", groupName)
 
-  const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
+  // const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
     const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id + "", createdAt: Timestamp.now().toDate() })
     setTextInput("")
@@ -42,7 +42,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
       if (currentUser && currentUser.data)
         fetchUsersFromGroup(group?.id as string, { userid: currentUser.data.id }, dispatchUsers)
 
-      fetchMessagesCallback(group?.id as string, setMessages)
+      fetchMessages(group?.id as string, setMessages)
 
       getGroupName(currentUser?.data?.id + "", group).then((groupName) => setGroupName(groupName))
     }
@@ -51,8 +51,19 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   }, [isFocused])
 
   return (
-    <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1 }}>
-      <BackBtn navigation={navigation} />
+    <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1, width }}>
+      <BackBtn goTo={() => navigation?.navigate("Home")} />
+      <FontAwesome5
+        name="info-circle"
+        size={24} color="orange"
+        style={{
+          position: "absolute",
+          top: 62,
+          right: 20,
+          zIndex: 10
+        }}
+        onPress={() => { navigation?.navigate("GroupInfo", group) }}
+      />
       <View style={styles.container}>
         <View style={styles.groupInfo}>
           <Text style={styles.groupName}>{groupName}</Text>
@@ -66,9 +77,12 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
               <View
                 key={i}
                 style={[styles.messageContainer,
-                (m.userid === currentUser?.data?.id) && styles.messageContainerRight]}
+                (m.userid === currentUser?.data?.id) && styles.messageContainerRight, i === 0 && { marginTop: 50 }]}
               >
-                {currentUser?.data?.id != m.userid && <Image source={m.user?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: m.user?.photoUrl + "" }} style={{ height: 48, width: 48, borderRadius: 48 / 2 }} />}
+                {
+                  currentUser?.data?.id != m.userid &&
+                  <ProfileImage uri={m.user?.photoUrl + ""} width={48} height={48} />
+                }
                 <Text style={[styles.messageText, m.userid === currentUser?.data?.id && { backgroundColor: 'orange' }]}>{m.content}</Text>
               </View>
             )
@@ -135,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   groupInfo: {
-    backgroundColor: '#111',
+    backgroundColor: '#333',
     zIndex: 3,
     position: 'absolute',
     top: 0,
@@ -143,6 +157,7 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 5,
   },
   groupName: {
     color: 'orange',

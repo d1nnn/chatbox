@@ -5,10 +5,14 @@ import { NavigationProp } from "../props/Navigation";
 
 const { width, height } = Dimensions.get('window')
 
-export default function BackBtn({ navigation }: NavigationProp): React.JSX.Element {
+type BackBtnType = {
+  goTo: () => void
+}
+
+export default function BackBtn({ goTo }: BackBtnType): React.JSX.Element {
 
   function goBack() {
-    navigation?.navigate("Home")
+    goTo()
   }
 
   return (

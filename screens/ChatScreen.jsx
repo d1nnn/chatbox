@@ -11,6 +11,8 @@ import Loading from '../screens/Loading'
 import useGroups from "../hooks/useGroups";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import ProfileImage from "../components/ProfileImage";
+import { GroupAction } from "../constants/group";
 
 
 const ChatScreen = ({ navigation }) => {
@@ -22,10 +24,11 @@ const ChatScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState("")
 
 
+
   useEffect(() => {
 
     if (isFocused) {
-      var unsubPromise = fetchGroups({ dispatchGroups, dispatchUser }, { userid: currentUser.data.id },)
+      var unsubPromise = fetchGroups({ dispatchGroups, dispatchUser }, { userid: currentUser?.data?.id },)
 
     }
 
@@ -35,12 +38,10 @@ const ChatScreen = ({ navigation }) => {
 
   }, [isFocused]);
 
-  const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
-  const renderItem = ({ item }, navigation, userid, groupName, setGroupName) => {
+  const renderItem = ({ item }, navigation) => {
 
 
-    getGroupName(userid, item).then(gName => { setGroupName(gName) })
 
     return (
       <>
@@ -55,9 +56,9 @@ const ChatScreen = ({ navigation }) => {
           }}
           containerStyle={{ backgroundColor: '#222', borderBottomWidth: 1, borderColor: 'orange' }}
         >
-          <Image defaultSource={profilepic} source={item?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: item?.photoUrl }} style={styles.profilePic} />
+          <ProfileImage uri={item?.photoUrl + ''} />
           <ListItem.Content>
-            <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{groupName}</ListItem.Title>
+            <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{item?.groupName}</ListItem.Title>
             <ListItem.Subtitle style={{ color: 'white' }}>{item?.latestMessage}</ListItem.Subtitle>
           </ListItem.Content>
           <ListItem.Content>

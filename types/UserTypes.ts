@@ -5,11 +5,12 @@ export type UserType = {
   displayName?: string | null,
   photoUrl?: string | null,
   groups: GroupType[],
-  friends: UserType[],
+  friends: string[],
   unread: {
     groupid: string,
     isRead: boolean
-  }[]
+  }[],
+  mutualCount: number
 }
 
 

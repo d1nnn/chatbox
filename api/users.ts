@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, onSnapshot, query, where } from "@firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "@firebase/firestore";
 import { UserType } from "../types/UserTypes";
 import { db } from "../configs/firebaseConfig";
 import useLogin from "../hooks/useLogin";
@@ -61,17 +61,29 @@ export function fetchUsers(
   return userList
 }
 
-export async function searchUsers(displayName: string): Promise<UserType[]> {
+export async function searchUsers(currentUserId: string, displayName: string): Promise<UserType[]> {
   const usersQuery = query(collection(db, "users"), where("displayName", ">=", displayName), where("displayName", "<=", displayName + '\uf8ff'))
+
+  const currentUserQuery = doc(db, "users", currentUserId)
+
   let userList: UserType[] = []
   const usersSnapshot = (await getDocs(usersQuery))
+  const currentUserResult = (await getDoc(currentUserQuery)).data() as UserType
 
   userList = usersSnapshot.docs.map(userdoc => {
-    const userResult = userdoc.data()
+    let counter = 0;
+    const userResult = userdoc.data() as UserType
+    userResult.friends.map(f => {
+      const res = currentUserResult.friends.find(id => id === f)
+      if (res)
+        counter++
+
+    })
+    userResult.mutualCount = counter
 
     return userResult as UserType
   })
-  console.log("userList in users.ts: ", userList)
 
   return userList
 }
+
