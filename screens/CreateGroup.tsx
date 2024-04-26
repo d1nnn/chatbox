@@ -15,6 +15,8 @@ import { KeyboardAvoidingView } from "native-base";
 import BackBtn from "../components/BackBtn";
 import { NavigationProp } from "../props/Navigation";
 import { createGroup } from "../api/groups";
+import UserChoice from "../components/UserChoice";
+import UserChoices from "../components/UserChoices";
 
 
 const { width, height } = Dimensions.get("window")
@@ -144,38 +146,7 @@ export default function CreateGroup({ navigation }: NavigationProp): React.JSX.E
         </View>
 
         {searchOpened &&
-          <ScrollView
-            style={styles.resultDropbox}
-          >
-            {
-              users.length ? users.map((user, i) => {
-                let isChosen = false
-                const userInList = chosenUsers.find(u => u.id === user.id)
-                if (userInList)
-                  isChosen = true
-
-                return (
-                  <TouchableOpacity style={{ width: "100%" }} onPress={() => chooseUser(user.id + "")} key={i}>
-                    <View style={styles.user} key={i} >
-                      <ProfileImage uri={user.photoUrl + ""} />
-                      <View>
-                        <Text style={styles.userText}>{user.displayName}</Text>
-                        <Text style={styles.mutual}>{user.mutualCount + " mutual friend"} </Text>
-                      </View>
-                      {
-                        isChosen &&
-                        <MaterialIcons name="radio-button-checked" size={24} color="orange" style={{ marginLeft: 'auto' }} />
-                      }
-                    </View>
-                  </TouchableOpacity>
-                )
-              })
-                :
-                <View style={{ alignSelf: 'center', marginTop: 80 }}>
-                  <Text style={{ color: 'orange', fontSize: 25, fontWeight: '700' }}>Result not found</Text>
-                </View>
-            }
-          </ScrollView>
+          <UserChoices chosenUsers={chosenUsers} users={users} chooseUser={chooseUser} />
         }
       </View>
 
@@ -217,12 +188,6 @@ const styles = StyleSheet.create({
   },
   searchText: {
     color: 'orange',
-  },
-  resultDropbox: {
-    backgroundColor: '#333',
-    width: width * 90 / 100,
-    height: 200,
-    alignSelf: 'center',
   },
   user: {
     padding: 10,

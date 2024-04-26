@@ -1,37 +1,22 @@
 import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "@firebase/firestore";
 import { UserType } from "../types/UserTypes";
 import { db } from "../configs/firebaseConfig";
-import useLogin from "../hooks/useLogin";
 import { CurrentUserOption } from "../types/Options";
-import { Dispatch } from "react";
 import { UserAction } from "../constants/user";
-import { Unsubscribe } from "firebase/auth";
-import { DispatchOptions } from "./groups";
+import { GroupType } from "../types/GroupTypes";
 
 
-export function fetchUsersFromGroup(groupid: string, option: CurrentUserOption, dispatch: Dispatch<any>): Unsubscribe {
+export async function fetchUsersFromGroup(group: GroupType): Promise<UserType[]> {
   let userList: UserType[] = []
-  const groupQuery = doc(db, "groups", groupid)
-
-  const unsub = onSnapshot(groupQuery, (groupDoc) => {
-    let groupResult = groupDoc.data()
-    const userQuery = query(collection(db, "users"), where("groupids", "array-contains", groupResult?.id))
-    // const userQuery = query(collection(db, "users"), where("id", "in", ["", ""]))
-
-    onSnapshot(userQuery, userSnapshot => {
-      userSnapshot.forEach(doc => {
-        let userResult = doc.data()
-        if (userResult.id == option.userid)
-          return
-        userList.push(userResult as UserType)
-      })
-
-      if (dispatch)
-        dispatch({ type: UserAction.FETCH, payload: userList })
+  if (group?.users?.length !== 0) {
+    group?.users?.map(async id => {
+      const userQuery = doc(db, "users", id)
+      const userResult = (await getDoc(userQuery)).data()
+      userList.push(userResult as UserType)
     })
-  })
-
-  return unsub
+  }
+  console.log("Users fetched from Groups: ", userList)
+  return userList
 }
 
 export function fetchUsers(
@@ -87,3 +72,8 @@ export async function searchUsers(currentUserId: string, displayName: string): P
   return userList
 }
 
+export async function addUserToGroup(groupid: string, userids: string[]) {
+  const groupRef = doc(db, "groups", groupid)
+
+
+}

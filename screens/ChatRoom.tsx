@@ -40,7 +40,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
     if (isFocused) {
 
       if (currentUser && currentUser.data)
-        fetchUsersFromGroup(group?.id as string, { userid: currentUser.data.id }, dispatchUsers)
+        fetchUsersFromGroup(group)
 
       fetchMessages(group?.id as string, setMessages)
 

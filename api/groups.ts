@@ -152,7 +152,7 @@ export async function createGroup(
   const allUsers = [...otherUsers, currentUserid]
 
 
-  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity, users: allUsers, photoUrl: groupPhotoUrl })
+  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity: allUsers.length, users: allUsers, photoUrl: groupPhotoUrl })
 
   await addMessage({ groupid: uid, userid: currentUserid, isFile: false, content: message, createdAt: Timestamp.now().toDate() })
 
@@ -230,4 +230,14 @@ export async function getGroupName(currentUserId: string, group: GroupType): Pro
   }
   groupName = groupName.substring(0, groupName.length - 2)
   return groupName
+}
+
+export async function updateGroup(groupid: string, payload: GroupType) {
+  const groupRef = doc(db, "groups", groupid)
+
+  try {
+    await updateDoc(groupRef, payload)
+  } catch (err) {
+    console.error(err)
+  }
 }
