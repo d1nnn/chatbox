@@ -45,7 +45,7 @@ export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
   experimentalLongPollingOptions: { timeoutSeconds: 10 }
 })
-connectAuthEmulator(auth, "http://10.0.2.2:9099")
+// connectAuthEmulator(auth, "http://10.0.2.2:9099")
 // connectFirestoreEmulator(db, '10.0.2.2', 8080);
 
 export const usersRef = collection(db, "users")

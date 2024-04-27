@@ -39,14 +39,12 @@ export default function Search({ data }: SearchType): React.JSX.Element {
   //     </>
   //   )
   // }
-  console.log(imageContainerWidth)
 
   return (
     data ?
       <View style={styles.searchContainer}>
         <View
           onLayout={(e: any) => {
-            console.log("layout", e.nativeEvent.layout)
             setImageContainerWidth(e.nativeEvent.layout.width)
           }}
           style={

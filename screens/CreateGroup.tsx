@@ -43,11 +43,9 @@ export default function CreateGroup({ navigation }: NavigationProp): React.JSX.E
   }
 
   function search() {
-    console.log("Searching")
     setSearchOpened(true)
     searchUsers(currentAuth?.data?.id + "", textInput).then((userList) => {
       let list = userList.filter((user) => user.id !== currentAuth?.data?.id)
-      console.log("userList in then: ", list)
       setUsers(list)
     })
   }

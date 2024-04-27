@@ -16,6 +16,12 @@ export type DispatchOptions = {
   [key: string]: Dispatch<any>
 }
 
+export async function fetchGroup(groupid: string): Promise<GroupType> {
+  const groupQuery = doc(db, "groups", groupid)
+  var groupResult = (await getDoc(groupQuery)).data() as GroupType
+  return groupResult
+}
+
 export async function fetchGroups(
   dispatchOptions: DispatchOptions,
   option: CurrentUserOption,
@@ -62,7 +68,6 @@ export async function fetchGroups(
 
       groupResult.latestMessage = messageResult?.content
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
-      console.log(userResult)
       const unreadGroup = userResult?.unread?.find(u => u.groupid === groupResult.id)
       groupResult.isRead = unreadGroup?.isRead
       groupResult.groupName = await getGroupName(option.userid as string, groupResult)
@@ -75,7 +80,6 @@ export async function fetchGroups(
     if (dispatchGroups) {
       dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
     }
-    console.log("dispatched groupList:", groupList)
   })
 
   return unsub
@@ -124,7 +128,6 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
     }
   })
-  console.log("UNSU", unsub)
   return unsub
 }
 
@@ -203,8 +206,16 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
 }
 
 export async function getGroupName(currentUserId: string, group: GroupType): Promise<string> {
-  if (group?.groupName && group.groupName as string !== "")
-    return group.groupName
+  // if(group?.groupNameV)
+  const groupRef = doc(db, "groups", group.id as string)
+  const groupResult = (await getDoc(groupRef)).data() as GroupType
+  if (groupResult?.groupName && groupResult.groupName as string !== "") {
+    return groupResult.groupName as string
+  }
+  //   if(
+  //   return groupResult.groupName as string
+
+
   let groupName = ""
   console.log("currentuserid: ", currentUserId)
 
@@ -232,12 +243,20 @@ export async function getGroupName(currentUserId: string, group: GroupType): Pro
   return groupName
 }
 
-export async function updateGroup(groupid: string, payload: GroupType) {
+export async function updateGroup(groupid: string, payload: GroupType): Promise<GroupType> {
   const groupRef = doc(db, "groups", groupid)
 
   try {
-    await updateDoc(groupRef, payload)
+    await updateDoc(groupRef, {
+      groupName: payload.groupName,
+      users: payload.users,
+      quantity: payload?.users?.length,
+      photoUrl: payload.photoUrl
+    })
   } catch (err) {
     console.error(err)
   }
+  const group = (await getDoc(groupRef)).data() as GroupType
+  return group
 }
+

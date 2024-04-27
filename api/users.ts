@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "@firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "@firebase/firestore";
 import { UserType } from "../types/UserTypes";
 import { db } from "../configs/firebaseConfig";
 import { CurrentUserOption } from "../types/Options";
@@ -6,17 +6,33 @@ import { UserAction } from "../constants/user";
 import { GroupType } from "../types/GroupTypes";
 
 
-export async function fetchUsersFromGroup(group: GroupType): Promise<UserType[]> {
+export async function fetchUsersFromGroup(currentUserid: string, group: GroupType): Promise<UserType[]> {
   let userList: UserType[] = []
+  const currentUserQuery = doc(db, "users", currentUserid)
+  const currentUserResult = (await getDoc(currentUserQuery)).data() as UserType
+
+
   if (group?.users?.length !== 0) {
-    group?.users?.map(async id => {
+    var promise: any = group?.users?.map(async id => {
+      let counter = 0
       const userQuery = doc(db, "users", id)
-      const userResult = (await getDoc(userQuery)).data()
+      const userResult = (await getDoc(userQuery)).data() as UserType
+      userResult?.friends.map(f => {
+        const res = currentUserResult.friends.find(id => id === f)
+        if (res)
+          counter++
+
+      })
+      userResult.mutualCount = counter
       userList.push(userResult as UserType)
     })
   }
-  console.log("Users fetched from Groups: ", userList)
+  await Promise.all(promise)
   return userList
+}
+
+function getMutualCount(thisUser: UserType, thatUser: UserType) {
+
 }
 
 export function fetchUsers(
@@ -76,4 +92,39 @@ export async function addUserToGroup(groupid: string, userids: string[]) {
   const groupRef = doc(db, "groups", groupid)
 
 
+}
+
+export async function fetchUser(userid: string): Promise<UserType> {
+  const userQuery = doc(db, "users", userid)
+  const userResult = (await getDoc(userQuery)).data() as UserType
+
+  return userResult
+}
+
+export async function addFriend(currentUserid: string, addId: string) {
+  const currentUserQuery = doc(db, "users", currentUserid)
+
+  try {
+    await updateDoc(currentUserQuery, {
+      friends: arrayUnion(addId)
+    })
+  } catch (err) {
+    console.error(err)
+  }
+
+}
+
+export async function fetchFriends(currentUserId: string): Promise<UserType[]> {
+  const currentUserQuery = doc(db, "users", currentUserId)
+  const currentUserResult = (await getDoc(currentUserQuery)).data() as UserType
+
+  const promise = currentUserResult.friends.map(async id => {
+    const userQuery = doc(db, "users", id)
+    const userResult = (await getDoc(userQuery)).data() as UserType
+
+    return userResult
+  })
+
+  const userList = await Promise.all(promise)
+  return userList
 }

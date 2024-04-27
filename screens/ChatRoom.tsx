@@ -12,7 +12,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
 import useUsers, { UserCtx } from "../hooks/useUsers";
 import { GroupType } from "../types/GroupTypes";
-import { getGroupName } from "../api/groups";
+import { fetchGroup, getGroupName } from "../api/groups";
 import ProfileImage from "../components/ProfileImage";
 
 const { width, height } = Dimensions.get('window')
@@ -27,7 +27,6 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   const [group, setGroup] = useState<GroupType>(route?.params as GroupType)
   const [groupName, setGroupName] = useState<string>("")
 
-  console.log("groupname: ", groupName)
 
   // const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
@@ -38,13 +37,15 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
 
   useEffect(() => {
     if (isFocused) {
-
-      if (currentUser && currentUser.data)
-        fetchUsersFromGroup(group)
-
       fetchMessages(group?.id as string, setMessages)
 
-      getGroupName(currentUser?.data?.id + "", group).then((groupName) => setGroupName(groupName))
+      fetchGroup(group?.id as string).then(gr => {
+        getGroupName(currentUser?.data?.id as string, gr).then(groupName => {
+          setGroupName(groupName as string)
+        })
+        console.log()
+        setGroup(gr)
+      })
     }
 
 

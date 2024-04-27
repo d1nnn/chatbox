@@ -10,6 +10,8 @@ import LatestMessageProvider from "../context/LatestMessageContext";
 import { GroupType } from "../types/GroupTypes";
 import CreateGroup from "../screens/CreateGroup";
 import GroupInfo from "../screens/GroupInfo";
+import Members from "../screens/Members";
+import { UserType } from "../types/UserTypes";
 
 
 export type RootParamList = {
@@ -23,6 +25,7 @@ export type RootParamList = {
   Profile: undefined;
   CreateGroup: undefined
   GroupInfo: GroupType
+  Members: { groupUsers: UserType[], chosenUsers: UserType[] }
 }
 const Stack = createStackNavigator<RootParamList>()
 
@@ -44,6 +47,8 @@ const StackNavigator = (): React.JSX.Element => {
               <Stack.Screen component={ChatRoom} name="ChatRoom" />
               <Stack.Screen component={CreateGroup} name="CreateGroup" />
               <Stack.Screen component={GroupInfo} name="GroupInfo" />
+              <Stack.Screen component={Members} name="Members" />
+
             </>
             : <>
               <Stack.Screen component={Welcome} name="Welcome"></Stack.Screen>

@@ -8,13 +8,13 @@ type InfoItem = {
   icon: any,
   color: string
   data?: { quantity?: number, newUsers?: UserType[] },
-  handleEditing?: () => void
+  handleClick?: () => void
 }
 
-export default function InfoItem({ title, icon, data, color, handleEditing }: InfoItem): React.JSX.Element {
+export default function InfoItem({ title, icon, data, color, handleClick }: InfoItem): React.JSX.Element {
 
   return (
-    <TouchableOpacity style={styles.item} onPress={handleEditing}>
+    <TouchableOpacity style={styles.item} onPress={handleClick}>
       <Entypo name={icon} size={24} color={color} />
       <Text
         style={[styles.itemTitle, { color }]}

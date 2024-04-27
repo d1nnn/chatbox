@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Dimensions, TextInput } from "react-native";
 import { NavigationProp } from "../props/Navigation";
 import { GroupType } from "../types/GroupTypes";
@@ -7,9 +7,12 @@ import ProfileImage from "../components/ProfileImage";
 import { AntDesign, Entypo, Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import InfoItem from "../components/InfoItem";
 import { UserType } from "../types/UserTypes";
-import { searchUsers } from "../api/users";
+import { fetchUsersFromGroup, searchUsers } from "../api/users";
 import useLogin from "../hooks/useLogin";
 import UserChoices from "../components/UserChoices";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { updateDoc } from "@firebase/firestore";
+import { updateGroup } from "../api/groups";
 
 const { width, height } = Dimensions.get('window')
 
@@ -20,52 +23,109 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
   const [payload, setPayload] = useState<GroupType>(group)
   const [chosenUsers, setChosenUsers] = useState<UserType[]>([])
   const [searchedUsers, setSearchedUsers] = useState<UserType[]>([])
+  const [groupIsUpdating, setGroupIsUpdating] = useState<boolean>(false)
   const [nameEditing, setNameEditing] = useState<boolean>(false)
   const [searchOpened, setSearchOpened] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>("")
   const [groupUsers, setGroupUsers] = useState<UserType[]>([])
 
+
   function search() {
     searchUsers(currentAuth?.data?.id as string, searchInput).then(userList => {
       currentGroup?.users?.forEach(userid => {
         userList = userList.filter(u => u.id !== userid)
-        console.log("UserList: ", userList)
       })
       setSearchedUsers(userList)
     })
   }
 
   function getBoxers() {
-
+    navigation?.navigate("Members", { groupUsers, chosenUsers })
   }
 
   function chooseUser(id: string) {
     setChosenUsers(prev => {
       const user = prev.find(u => u.id === id)
-      if (user)
-        return prev.filter(u => u.id !== id)
+      if (user) {
+        let newList: UserType[] = prev.filter(u => u.id !== id)
+        return newList
+      }
 
       const chosenUser = searchedUsers.find(u => u.id === id)
-      return [...prev, chosenUser] as UserType[]
+      const newList = [...prev, chosenUser]
+      return newList as UserType[]
     })
   }
 
-  function sendPayload() {
 
-  }
+
+  useEffect(() => {
+    fetchUsersFromGroup(currentAuth?.data?.id as string, currentGroup).then(userList => setGroupUsers(userList))
+  }, [currentGroup])
 
   return (
     <View style={styles.container}>
       <BackBtn goTo={() => { navigation?.goBack() }} />
-      <View style={styles.prompt}>
-        <AntDesign name="checkcircle" size={32} color="orange" />
-        <Entypo name="circle-with-cross" size={38} color="red" />
-      </View>
+      {
+        groupIsUpdating &&
+        <View style={styles.prompt}>
+          <TouchableOpacity
+            onPress={() => {
+              const chosenUserids = chosenUsers.map(u => u.id) as string[]
+              setPayload(prev => {
+                const userids = prev.users as string[]
+                updateGroup(currentGroup?.id as string, { ...prev, users: [...userids, ...chosenUserids] }).then(group => {
+                  setChosenUsers([])
+                  setPayload(group)
+                  setCurrentGroup(group)
+                  setNameEditing(false)
+                  setGroupIsUpdating(false)
+                })
+                return ({ ...prev, users: [...userids, ...chosenUserids] })
+              })
+
+            }
+            }
+          >
+            <AntDesign name="checkcircle" size={32} color="orange" />
+          </TouchableOpacity>
+
+
+
+          <TouchableOpacity onPress={() => {
+            setNameEditing(false)
+            setGroupIsUpdating(false)
+            setPayload(currentGroup)
+          }} >
+            <Entypo name="circle-with-cross" size={38} color="red" />
+          </TouchableOpacity>
+        </View>
+      }
       <ProfileImage uri={currentGroup.photoUrl as string} height={100} width={100} />
 
       {!nameEditing ? <Text style={styles.groupName}>{currentGroup.groupName}</Text>
         :
-        <TextInput value={currentGroup.groupName} style={{ color: 'orange', fontSize: 25, backgroundColor: '#333', padding: 10, width: width / 2, borderRadius: 5, textAlign: 'center', fontWeight: '600' }} />
+        <TextInput
+          value={payload.groupName}
+          style={
+            {
+              color: 'orange',
+              fontSize: 25,
+              backgroundColor: '#333',
+              padding: 10,
+              width: width / 2,
+              borderRadius: 5,
+              textAlign: 'center',
+              fontWeight: '600'
+            }
+          }
+          onChange={(e) => {
+            e.persist()
+            setPayload(prev => ({ ...prev, groupName: e.nativeEvent.text }))
+          }
+          }
+
+        />
       }
       <View style={styles.icons}>
         <View style={styles.icon}>
@@ -78,8 +138,13 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
 
       <Text style={{ color: '#999', fontSize: 25, alignSelf: 'flex-start', marginTop: 10 }}>Customization</Text>
       <View style={styles.custom}>
-        <InfoItem color="orange" icon="new-message" title="Change box name" handleEditing={() => setNameEditing(prev => !prev)} />
-        <InfoItem color="orange" icon="users" title="See boxers" data={{ quantity: group?.quantity, newUsers: chosenUsers }} />
+        <InfoItem color="orange" icon="new-message" title="Change box name" handleClick={() => {
+          setNameEditing(prev => !prev)
+          setGroupIsUpdating(true)
+        }} />
+        <InfoItem color="orange" icon="users" title="See boxers" data={{ quantity: currentGroup.quantity, newUsers: chosenUsers }} handleClick={() => {
+          getBoxers()
+        }} />
 
       </View>
       <View style={{ marginTop: 50 }}>
