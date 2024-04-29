@@ -19,7 +19,7 @@ export default function UserChoices({ users, chosenUsers, chooseUser }: UserChoi
       {
         users.length ? users.map((user, i) => {
           let isChosen = false
-          const userInList = chosenUsers.find(u => u.id === user.id)
+          const userInList = chosenUsers.find(u => u?.id === user?.id)
           if (userInList)
             isChosen = true
 
@@ -27,8 +27,8 @@ export default function UserChoices({ users, chosenUsers, chooseUser }: UserChoi
             <UserChoice
               user={user}
               isChosen={isChosen}
-              handleChooseUser={() => chooseUser(user.id as string)}
-              key={user.id}
+              handleChooseUser={() => chooseUser(user?.id as string)}
+              key={user?.id}
             />
           )
         }

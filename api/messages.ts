@@ -7,8 +7,8 @@ import { UserType } from "../types/UserTypes";
 
 
 
-export function fetchMessages(groupid: string, handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Unsubscribe {
-  var currentGroupMessagesQuery = query(collection(db, "messages"), where("groupid", "==", groupid), orderBy("createdAt", "asc"))
+export async function fetchMessages(groupid: string, lm: number, handleMessages?: Dispatch<SetStateAction<MessageType[]>>): Promise<Unsubscribe> {
+  var currentGroupMessagesQuery = query(collection(db, "messages"), where("groupid", "==", groupid), limit(lm), orderBy("createdAt", "desc"))
   var unsub = onSnapshot(currentGroupMessagesQuery, async messageSnapshot => {
 
     const futureMessages = messageSnapshot.docs.map(async (messageDoc) => {
@@ -23,7 +23,11 @@ export function fetchMessages(groupid: string, handleMessages?: Dispatch<SetStat
     })
     const messages: MessageType[] = await Promise.all(futureMessages)
     if (handleMessages) {
-      handleMessages(messages)
+      let newMessages: MessageType[] = []
+      for (let m of messages) {
+        newMessages.unshift(m)
+      }
+      handleMessages(newMessages)
     }
   })
   return unsub

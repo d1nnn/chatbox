@@ -4,13 +4,14 @@ export type UserType = {
   id?: string | null,
   displayName?: string | null,
   photoUrl?: string | null,
-  groups: GroupType[],
+  groupids: GroupType[],
   friends: string[],
   unread: {
     groupid: string,
     isRead: boolean
   }[],
   mutualCount: number
+  isFriend: boolean
 }
 
 

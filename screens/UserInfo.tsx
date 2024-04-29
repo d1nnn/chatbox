@@ -1,41 +1,83 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Dimensions } from "react-native";
 import { NavigationProp } from "../props/Navigation";
-import { GroupType } from "../types/GroupTypes";
 import BackBtn from "../components/BackBtn";
 import ProfileImage from "../components/ProfileImage";
-import { AntDesign, Entypo, FontAwesome6 } from "@expo/vector-icons";
-import InfoItem from "../components/InfoItem";
+import { AntDesign, Entypo, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { UserType } from "../types/UserTypes";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { addFriend, unfriend } from "../api/users";
+import useLogin from "../hooks/useLogin";
 
 const { width, height } = Dimensions.get('window')
 
 export default function UserInfo({ navigation, route }: NavigationProp): React.JSX.Element {
-  const group: GroupType = route?.params as GroupType
+  const user: UserType = route?.params as UserType
+  const { state: currentAuth } = useLogin()
+  const [currentUserChosen, setCurrentUserChosen] = useState(user)
+  const [unfriendIsOpened, setUnfriendIsOpened] = useState(false)
 
+  useEffect(() => {
+    if (user.id === currentAuth?.data?.id)
+      navigation?.navigate("Profile")
+  }, [])
+
+
+  function makeFriend(id: string) {
+    addFriend(currentAuth?.data?.id as string, id).then(user => setCurrentUserChosen(user))
+  }
 
   return (
     <View style={styles.container}>
       <BackBtn goTo={() => { navigation?.goBack() }} />
-      <ProfileImage uri={group.photoUrl as string} height={100} width={100} />
-      <Text style={styles.groupName}>{group.groupName}</Text>
-      <View style={styles.icons}>
-        <View style={styles.icon}>
-          <FontAwesome6 name="magnifying-glass" size={24} color="orange" />
-        </View>
-        <View style={styles.icon}>
-          <AntDesign name="adduser" size={24} color="orange" />
-        </View>
+      <ProfileImage uri={currentUserChosen.photoUrl as string} height={100} width={100} />
+      <Text style={styles.userName}>{currentUserChosen.displayName}</Text>
+      <View style={{ padding: 10, borderRadius: 5, flexDirection: 'row', gap: 20, justifyContent: 'center', alignItems: 'center', }}>
+        {currentUserChosen.isFriend ?
+          <View >
+            <TouchableOpacity style={{ flexDirection: 'row', padding: 10, backgroundColor: 'orange', borderRadius: 5 }} onPress={() => setUnfriendIsOpened(prev => !prev)}>
+              <Text style={{ fontSize: 18 }}>Following</Text>
+
+              <FontAwesome name="check" size={24} color="black" />
+            </TouchableOpacity>
+
+            {unfriendIsOpened &&
+              <View style={{ position: 'absolute', top: '100%', left: 0, marginTop: 5 }}>
+                <TouchableOpacity onPress={() => {
+                  unfriend(currentAuth?.data?.id as string, currentUserChosen.id as string).then(() => navigation?.goBack())
+                }}>
+                  <Text style={{ padding: 10, backgroundColor: 'red', color: '#fff', borderRadius: 5 }}>Unfriend</Text>
+                </TouchableOpacity>
+              </View>
+            }
+          </View>
+          :
+          (!(currentAuth?.data?.id === currentUserChosen.id) && <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              padding: 10,
+              backgroundColor: 'orange',
+              borderRadius: 5,
+              alignItems: 'center',
+              gap: 5
+            }}
+            onPress={() => makeFriend(currentUserChosen.id as string)}
+          >
+
+            <Entypo name="plus" size={20} color="black" />
+            <Text style={{ fontSize: 18 }}>Follow</Text>
+          </TouchableOpacity>
+          )
+        }
+        <TouchableOpacity onPress={() => navigation?.navigate("CreateGroup", currentUserChosen)}>
+          <Text style={{ padding: 10, paddingHorizontal: 20, backgroundColor: '#222', color: '#999', fontSize: 18, borderRadius: 5, borderColor: '#999', borderWidth: 0.2 }}>Message</Text>
+        </TouchableOpacity>
+
       </View>
 
-      <Text style={{ color: '#999', fontSize: 20, alignSelf: 'flex-start', marginTop: 10 }}>Customization</Text>
       <View style={styles.custom}>
-        <InfoItem color="orange" icon="new-message" title="Change box name" />
-        <InfoItem color="orange" icon="users" title="See boxers" data={group.quantity} />
 
-      </View>
-      <View style={{ marginTop: 50 }}>
-        <InfoItem icon="circle-with-cross" title="Leave box" color="red" />
       </View>
     </View>
   )
@@ -52,7 +94,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     minHeight: height,
   },
-  groupName: {
+  userName: {
     fontSize: 25,
     color: 'orange',
     fontWeight: '700',

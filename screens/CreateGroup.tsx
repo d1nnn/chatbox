@@ -1,35 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Keyboard, SafeAreaView, StyleSheet, Text, TextInput, View, TouchableOpacity, Dimensions, TouchableWithoutFeedback, Image } from "react-native";
-import Suggestion from "../components/Suggestion";
-import Search from "../components/Search";
+import UserIcons from "../components/UserIcons";
 import { Entypo, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { searchUsers } from "../api/users";
-import useUsers, { UserCtx } from "../hooks/useUsers";
-import { UserAction } from "../constants/user";
 import useLogin from "../hooks/useLogin";
 import { UserType } from "../types/UserTypes";
-import { ScrollView } from 'react-native-gesture-handler'
-import ProfileImage from "../components/ProfileImage";
-import { MaterialIcons } from '@expo/vector-icons';
 import { KeyboardAvoidingView } from "native-base";
-import BackBtn from "../components/BackBtn";
 import { NavigationProp } from "../props/Navigation";
 import { createGroup } from "../api/groups";
-import UserChoice from "../components/UserChoice";
 import UserChoices from "../components/UserChoices";
 
 
 const { width, height } = Dimensions.get("window")
-export default function CreateGroup({ navigation }: NavigationProp): React.JSX.Element {
+export default function CreateGroup({ navigation, route }: NavigationProp): React.JSX.Element {
   const inputRef = useRef<TextInput>(null)
-  // const [inputIsFocused, setInputIsFocused] = useState<boolean>(inputRef.current?.isFocused() as boolean)
+  const user = route?.params as UserType
   const [users, setUsers] = useState<UserType[]>([])
-  const [chosenUsers, setChosenUsers] = useState<UserType[]>([])
+  const [chosenUsers, setChosenUsers] = useState<UserType[]>([user])
   const { state: currentAuth, dispatch: dispatchAuth } = useLogin()
   const [textInput, setTextInput] = useState<string>("")
   const [messageTextInput, setMessageTextInput] = useState<string>("")
   const [searchOpened, setSearchOpened] = useState<boolean>(false)
-  const [groupName, setGroupName] = useState<string>("")
+  const [groupName, setGroupName] = useState<string>(user?.displayName as string)
 
   function chooseUser(id: string) {
     setChosenUsers(prev => {
@@ -55,7 +47,7 @@ export default function CreateGroup({ navigation }: NavigationProp): React.JSX.E
     const group = await createGroup({
       currentUserid: currentAuth.data?.id as string,
       message: messageTextInput,
-      quantity: chosenUsers.length,
+      quantity: chosenUsers?.length,
       groupName,
       otherUsers: users as string[]
     })
@@ -89,7 +81,7 @@ export default function CreateGroup({ navigation }: NavigationProp): React.JSX.E
 
 
         <View style={styles.createGroupInputContainer}>
-          {groupName.length ?
+          {groupName?.length ?
             <MaterialCommunityIcons
               name="pencil-remove"
               size={24}
@@ -148,7 +140,7 @@ export default function CreateGroup({ navigation }: NavigationProp): React.JSX.E
         }
       </View>
 
-      <Search data={chosenUsers} />
+      <UserIcons data={chosenUsers} />
       <Text style={styles.groupName}>{groupName}</Text>
       <Text style={{ color: '#999', alignSelf: 'center', fontSize: 18 }}>Say something to create this box</Text>
       <Image source={require("../assets/chat-1873543_1280.png")} style={{ width: 200, height: 200, objectFit: 'cover', alignSelf: 'center', marginTop: 30 }} />

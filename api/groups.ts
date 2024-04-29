@@ -184,9 +184,10 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
         return null
     }).filter((u: any) => u !== null)
     try {
-      await updateDoc(userRef, {
-        unread: newUnread
-      })
+      if (newUnread)
+        await updateDoc(userRef, {
+          unread: newUnread
+        })
     } catch (err) {
       console.error("Error updating userDoc:", err)
     }
@@ -206,18 +207,14 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
 }
 
 export async function getGroupName(currentUserId: string, group: GroupType): Promise<string> {
-  // if(group?.groupNameV)
   const groupRef = doc(db, "groups", group.id as string)
   const groupResult = (await getDoc(groupRef)).data() as GroupType
   if (groupResult?.groupName && groupResult.groupName as string !== "") {
     return groupResult.groupName as string
   }
-  //   if(
-  //   return groupResult.groupName as string
 
 
   let groupName = ""
-  console.log("currentuserid: ", currentUserId)
 
   let usersQuery = query(collection(db, "users"), where("groupids", "array-contains", group?.id))
 
@@ -234,7 +231,6 @@ export async function getGroupName(currentUserId: string, group: GroupType): Pro
 
       groupName += userResult?.displayName
       groupName += ", "
-      console.log("groupName inside userSnapshot", groupName)
     })
   } catch (err) {
     console.error(err)
@@ -260,3 +256,9 @@ export async function updateGroup(groupid: string, payload: GroupType): Promise<
   return group
 }
 
+export async function addGroupToUser(userid: string, groupid: string) {
+  const userQuery = doc(db, "users", userid)
+  await updateDoc(userQuery, {
+    groupids: arrayUnion(groupid)
+  })
+}

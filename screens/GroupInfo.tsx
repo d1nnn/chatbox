@@ -7,12 +7,13 @@ import ProfileImage from "../components/ProfileImage";
 import { AntDesign, Entypo, Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import InfoItem from "../components/InfoItem";
 import { UserType } from "../types/UserTypes";
-import { fetchUsersFromGroup, searchUsers } from "../api/users";
+import { fetchUsersFromGroup, leaveGroup, searchUsers } from "../api/users";
 import useLogin from "../hooks/useLogin";
 import UserChoices from "../components/UserChoices";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { updateDoc } from "@firebase/firestore";
-import { updateGroup } from "../api/groups";
+import { addGroupToUser, updateGroup } from "../api/groups";
+import { chooseImage } from "../utils/image";
 
 const { width, height } = Dimensions.get('window')
 
@@ -28,6 +29,7 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
   const [searchOpened, setSearchOpened] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>("")
   const [groupUsers, setGroupUsers] = useState<UserType[]>([])
+  const [image, setImage] = useState<{ uri?: string, fileName: string }>({ uri: currentGroup.photoUrl, fileName: "" })
 
 
   function search() {
@@ -74,7 +76,10 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
               const chosenUserids = chosenUsers.map(u => u.id) as string[]
               setPayload(prev => {
                 const userids = prev.users as string[]
-                updateGroup(currentGroup?.id as string, { ...prev, users: [...userids, ...chosenUserids] }).then(group => {
+                updateGroup(currentGroup?.id as string, { ...prev, users: [...userids, ...chosenUserids], photoUrl: image.uri }).then(group => {
+                  chosenUserids.forEach(id => {
+                    addGroupToUser(id, group.id as string)
+                  })
                   setChosenUsers([])
                   setPayload(group)
                   setCurrentGroup(group)
@@ -96,12 +101,13 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
             setNameEditing(false)
             setGroupIsUpdating(false)
             setPayload(currentGroup)
+            setImage(prev => ({ ...prev, uri: currentGroup.photoUrl }))
           }} >
             <Entypo name="circle-with-cross" size={38} color="red" />
           </TouchableOpacity>
         </View>
       }
-      <ProfileImage uri={currentGroup.photoUrl as string} height={100} width={100} />
+      <ProfileImage uri={image.uri as string} height={100} width={100} />
 
       {!nameEditing ? <Text style={styles.groupName}>{currentGroup.groupName}</Text>
         :
@@ -145,10 +151,20 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
         <InfoItem color="orange" icon="users" title="See boxers" data={{ quantity: currentGroup.quantity, newUsers: chosenUsers }} handleClick={() => {
           getBoxers()
         }} />
+        <InfoItem color="orange" icon="image-inverted" title="Change box picture" handleClick={() => {
+          chooseImage().then(img => {
+            console.log(img)
+            if (img)
+              setImage(img)
+          })
+          setGroupIsUpdating(true)
+        }} />
 
       </View>
       <View style={{ marginTop: 50 }}>
-        <InfoItem icon="" title="Leave box" color="red" />
+        <InfoItem icon="" title="Leave box" color="red" handleClick={() => {
+          leaveGroup(currentAuth?.data?.id as string, currentGroup?.id as string).then(() => navigation?.navigate("Home"))
+        }} />
       </View>
 
       {
@@ -178,7 +194,10 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
               />
             </View>
           </View>
-          <UserChoices users={searchedUsers} chooseUser={chooseUser} chosenUsers={chosenUsers} />
+          <UserChoices users={searchedUsers} chooseUser={(id) => {
+            setGroupIsUpdating(true)
+            chooseUser(id)
+          }} chosenUsers={chosenUsers} />
         </View>
       }
     </View>

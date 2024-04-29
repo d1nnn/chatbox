@@ -6,7 +6,7 @@ import { MessageType } from "../types/MessageTypes";
 import useLogin from "../hooks/useLogin";
 import BackBtn from "../components/BackBtn";
 import { addMessage, fetchMessage, fetchMessages } from "../api/messages";
-import { fetchUsersFromGroup } from "../api/users";
+import { fetchUser, fetchUsersFromGroup } from "../api/users";
 import { UserType } from "../types/UserTypes";
 import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
@@ -14,8 +14,12 @@ import useUsers, { UserCtx } from "../hooks/useUsers";
 import { GroupType } from "../types/GroupTypes";
 import { fetchGroup, getGroupName } from "../api/groups";
 import ProfileImage from "../components/ProfileImage";
+import { FlatList } from "react-native-gesture-handler";
+import { ListItem } from "react-native-elements";
+import Loading from "./Loading";
 
 const { width, height } = Dimensions.get('window')
+const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
 export default function ChatRoom({ navigation, route }: NavigationProp): React.JSX.Element {
   const [messages, setMessages] = useState<MessageType[]>([])
@@ -26,6 +30,8 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   const scrollViewRef = useRef<ScrollView>(null)
   const [group, setGroup] = useState<GroupType>(route?.params as GroupType)
   const [groupName, setGroupName] = useState<string>("")
+  const [limit, setLimit] = useState(15)
+  const [isLoading, setIsLoading] = useState(false)
 
 
   // const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
@@ -33,11 +39,38 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
     const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id + "", createdAt: Timestamp.now().toDate() })
     setTextInput("")
   }
+  const isCloseToTop = ({ layoutMeasurement, contentOffset, contentSize }: any) => {
+    return contentOffset.y <= 20
+  };
 
+  const renderItem: any = ({ item }: any, navigation: any) => {
+    const isAuth = item?.userid === currentUser?.data?.id
+    return (
+      <View style={{
+        flexDirection: 'row',
+        alignSelf: isAuth ? 'flex-end' : 'flex-start',
+        alignItems: 'center',
+        gap: 10,
+      }}>
+        {
+          !isAuth &&
+          <Image source={item?.user?.photoUrl === "" ? DEFAULT_IMAGE : { uri: item?.user?.photoUrl }} style={{ width: 40, height: 40, borderRadius: 40 / 2 }} />
+        }
+        <Text style={{
+          backgroundColor: isAuth ? 'orange' : '#333',
+          color: isAuth ? 'black' : '#fff',
+          padding: 10,
+          borderRadius: 5,
+          maxWidth: width / 2,
+          fontSize: 16
+        }}>{item?.content}</Text>
+      </View>
+    )
+  }
 
   useEffect(() => {
     if (isFocused) {
-      fetchMessages(group?.id as string, setMessages)
+      fetchMessages(group?.id as string, limit, setMessages)
 
       fetchGroup(group?.id as string).then(gr => {
         getGroupName(currentUser?.data?.id as string, gr).then(groupName => {
@@ -69,7 +102,44 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
         <View style={styles.groupInfo}>
           <Text style={styles.groupName}>{groupName}</Text>
         </View>
-        <ScrollView contentContainerStyle={styles.messages} ref={scrollViewRef} onContentSizeChange={() => { scrollViewRef.current?.scrollToEnd() }}>
+        {
+          isLoading &&
+          <Loading />
+        }
+
+        {messages &&
+
+          <FlatList
+            renderItem={renderItem}
+            data={messages}
+            contentContainerStyle={{ width, justifyContent: 'flex-start', flexDirection: 'column', padding: 20, gap: 20, paddingTop: 70, flexGrow: 1 }}
+            onStartReached={() => {
+              setIsLoading(true)
+              fetchMessages(group?.id as string, limit + 10, setMessages).then(unsub => {
+
+                setLimit(limit + 10)
+                setIsLoading(false)
+              })
+            }}
+            scrollEventThrottle={400}
+          />
+        }
+
+
+        {/*<ScrollView
+          scrollEventThrottle={400}
+          onScroll={({ nativeEvent }) => {
+            if (isCloseToTop(nativeEvent)) {
+              console.log('scrolled')
+              fetchMessages(group?.id as string, limit + 10, setMessages)
+              console.log('after scrolled')
+              setLimit(prev => prev + 10)
+              scrollViewRef.current?.scrollTo({ y: 25 })
+            }
+          }}
+          contentContainerStyle={styles.messages}
+          ref={scrollViewRef}
+        >
           {
             messages
             &&
@@ -90,6 +160,10 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
             )
           }
         </ScrollView>
+        */}
+
+
+
         <View style={styles.inputContainer}>
           <TextInput style={styles.inputMessage} value={textInput} onChange={(e) => { setTextInput(e.nativeEvent.text) }} />
           <TouchableWithoutFeedback onPress={sendMessage}>

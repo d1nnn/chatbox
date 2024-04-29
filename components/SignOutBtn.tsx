@@ -1,9 +1,10 @@
-import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import firebaseApi from '../configs/firebaseConfig'
 import useGroups from "../hooks/useGroups";
 import { GroupAction } from "../constants/group";
 import useHasLatestMessage from "../hooks/useHasLatestMessage";
 
+const { width, height } = Dimensions.get('window')
 
 export default function SignOutBtn() {
   const { dispatch: dispatchGroups } = useGroups()
@@ -19,18 +20,16 @@ export default function SignOutBtn() {
     })
   }
   return (
-    <View>
-      <TouchableWithoutFeedback style={styles.signOut} onPress={signOut}>
-        <Text style={styles.signOutText}>Sign out</Text>
-      </TouchableWithoutFeedback>
-    </View>
+    <TouchableWithoutFeedback style={styles.signOut} onPress={signOut}>
+      <Text style={styles.signOutText}>Sign out</Text>
+    </TouchableWithoutFeedback>
   )
 }
 
 const styles = StyleSheet.create({
   signOut: {
     padding: 10,
-    backgroundColor: '#333'
+    alignSelf: 'center',
   },
   signOutText: {
     color: 'white',
@@ -38,5 +37,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     alignSelf: 'flex-start',
     borderRadius: 5,
+    width: width / 3,
+    textAlign: 'center',
+    fontSize: 20,
   }
 })

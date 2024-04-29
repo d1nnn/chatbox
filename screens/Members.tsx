@@ -6,7 +6,7 @@ import { NavigationProp } from "../props/Navigation";
 import { ScrollView } from "react-native-gesture-handler";
 import ProfileImage from "../components/ProfileImage";
 import useLogin from "../hooks/useLogin";
-import { addFriend, fetchUser, fetchUsers } from "../api/users";
+import { addFriend, fetchUser } from "../api/users";
 
 export default function Members({ navigation, route }: NavigationProp): React.JSX.Element {
   const groupObj = route?.params as { groupUsers: UserType[], chosenUsers: UserType[] }
@@ -16,30 +16,41 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
   const [chosenGroupUsers, setChosenGroupUsers] = useState<UserType[]>(groupObj.chosenUsers)
   const [combinedUsers, setCombinedUsers] = useState<UserType[]>([...chosenGroupUsers, ...currentGroupUsers])
 
-  function handleChooseUser(user: UserType) { }
+  function handleChooseUser(user: UserType) {
+    if (user.id !== currentAuth?.data?.id)
+      navigation?.navigate("UserInfo", user)
+    else
+      navigation?.navigate("Profile")
+  }
 
-  const User = ({ user, isNotFriend, yetUpdate }: { user: UserType, isNotFriend: boolean, yetUpdate?: boolean }) => {
-    const [notFriend, setNotFriend] = useState(isNotFriend)
+  const User = ({ user, yetUpdate }: { user: UserType, yetUpdate?: boolean }) => {
 
     return (
-      <TouchableOpacity style={[{ width: "100%" }, (yetUpdate && yetUpdate === true) && { opacity: 0.5, pointerEvents: 'none' }]} onPress={() => handleChooseUser(user)} >
+      <TouchableOpacity style={[{ width: "100%" }, (yetUpdate && yetUpdate === true) && { opacity: 0.5, pointerEvents: 'none' }]} onPress={() => {
+        handleChooseUser(user)
+      }} >
         <View style={styles.user} >
           <ProfileImage uri={user.photoUrl + ""} />
           <View>
             <View>
               <Text style={styles.userText}>{user.displayName}</Text>
-              <Text style={styles.mutual}>{user.mutualCount + " mutual friend"} </Text>
+              <Text style={styles.mutual}>{user.mutualCount > 0 && `${user.mutualCount} mutual friend`} </Text>
             </View>
           </View>
           {
-            notFriend && !yetUpdate &&
+            !user.isFriend && !(user.id === currentAuth?.data?.id) && !yetUpdate &&
             <TouchableOpacity
               style={styles.addFriendBtn}
               onPress={() => {
-                addFriend(currentUser?.id as string, user?.id as string).then(() => setNotFriend(false))
+                addFriend(currentUser?.id as string, user?.id as string).then((u) => {
+                  setCurrentGroupUsers(prev => {
+                    const newList = prev.filter(usr => usr.id !== u.id)
+                    return [...newList, u]
+                  })
+                })
               }}
             >
-              <Text>Add friend</Text>
+              <Text>Follow</Text>
             </TouchableOpacity>
           }
         </View>
@@ -63,14 +74,14 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
         <ScrollView style={styles.members}>
           {
             currentUser && currentGroupUsers.length !== 0 &&
-            currentGroupUsers.map(user => {
+            currentGroupUsers.map((user, i) => {
               const friend = currentUser.friends.find(id => id === user.id)
               if (!friend) {
                 return (
-                  <User user={user} isNotFriend={true} />
+                  <User key={i} user={user} />
                 )
               } else {
-                return (<User user={user} isNotFriend={false} />)
+                return (<User key={i} user={user} />)
               }
             })
 
@@ -81,10 +92,10 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
               const friend = currentUser.friends.find(id => id === user.id)
               if (!friend) {
                 return (
-                  <User user={user} isNotFriend={true} yetUpdate={true} />
+                  <User user={user} yetUpdate={true} />
                 )
               } else {
-                return (<User user={user} isNotFriend={false} yetUpdate={true} />)
+                return (<User user={user} yetUpdate={true} />)
               }
 
             })

@@ -1,94 +1,89 @@
-import React, { Dispatch, useRef, useState } from "react";
-import { Image, ListRenderItem, StyleSheet, Text, View, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Dimensions, Text, TextInput, View } from "react-native";
+import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { UserType } from "../types/UserTypes";
-import { ListItem } from "react-native-elements";
-import { FlatList } from "react-native-gesture-handler";
+import UserList from "./UserList";
+import { fetchFriends, fetchUsers, searchUsers } from "../api/users";
+import useLogin from "../hooks/useLogin";
+import Loading from "../screens/Loading";
 
 type SearchType = {
-  data?: UserType[],
+  handleFriends: (users: UserType[]) => void
 }
 
 const { width, height } = Dimensions.get('window')
-const DEFAULT_IMAGE = require("../assets/profilepic.png")
+export default function Search({ handleFriends }: SearchType): React.JSX.Element {
 
-export default function Search({ data }: SearchType): React.JSX.Element {
-  const [imageContainerWidth, setImageContainerWidth] = useState<number>(0)
+  const { state: currentAuth } = useLogin()
+  const [searchInput, setSearchInput] = useState("")
+  const [searchedUsers, setSearchedUsers] = useState<UserType[]>([])
+  const [suggestedUsers, setSuggestedUsers] = useState<UserType[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
+  console.log("SEARCHED: ", handleFriends)
+  console.log()
 
-  // const renderItem: ListRenderItem<UserType> = ({ item }) => {
-  //   return (
-  //     <>
-  //       <ListItem
-  //         key={item?.id}
-  //         onPress={() => {
-  //           // Xử lý khi người dùng chọn một người để chat
-  //           console.log("Start chat with group:", item?.id);
-  //         }}
-  //         containerStyle={{ backgroundColor: '#222', borderBottomWidth: 1, borderColor: 'orange' }}
-  //       >
-  //         <Image source={item?.photoUrl + "" === "" ? DEFAULT_IMAGE : { uri: item?.photoUrl }} style={styles.profilePic} />
-  //         <ListItem.Content>
-  //           <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{item?.displayName}</ListItem.Title>
-  //           <ListItem.Subtitle style={{ color: 'white' }}>1 mutual friend</ListItem.Subtitle>
-  //         </ListItem.Content>
-  //         <ListItem.Content>
-  //           <ListItem.Title style={{ color: 'white', marginLeft: 'auto' }}>Click me</ListItem.Title>
-  //         </ListItem.Content>
-  //
-  //       </ListItem>
-  //     </>
-  //   )
-  // }
+  function search() {
+    searchUsers(currentAuth?.data?.id as string, searchInput).then(userList => setSearchedUsers(userList))
+  }
+
+  useEffect(() => {
+    fetchUsers(currentAuth?.data?.id as string).then(userList => {
+      const newList = userList.filter(u => u.mutualCount > 0)
+      setSuggestedUsers(newList)
+      setIsLoading(false)
+    })
+  }, [])
 
   return (
-    data ?
-      <View style={styles.searchContainer}>
-        <View
-          onLayout={(e: any) => {
-            setImageContainerWidth(e.nativeEvent.layout.width)
-          }}
-          style={
-            [
-              styles.imageContainer,
-              { transform: [{ translateX: -data.length * 15 }] }
-            ]
-          }
-        >
-          {data.map((user, i) => (
-            <Image source={user.photoUrl === "" ? DEFAULT_IMAGE : { uri: user.photoUrl + "" }} key={i} style={[styles.profilePic, { left: i * 25 }]} />
-          )
-          )}
-        </View>
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20, marginBottom: 20 }}>
+        <TextInput
+          style={{ padding: 10, paddingHorizontal: 20, backgroundColor: '#333', color: 'orange', flex: 1, borderRadius: 5 }}
+          placeholderTextColor={"#999"}
+          placeholder="Search for user"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.nativeEvent.text)}
+        />
 
-
+        <TouchableOpacity onPress={search}>
+          <Text
+            style={{ padding: 10, borderRadius: 5, backgroundColor: 'orange' }}
+          >
+            Search
+          </Text>
+        </TouchableOpacity>
 
       </View>
-      :
-      <View style={styles.container}><Text>This is Search</Text></View>
+      <View>
+
+
+        {
+          searchedUsers.length > 0 ?
+            <UserList data={searchedUsers} handleUsers={(users) => {
+              setSearchedUsers(users)
+              fetchFriends(currentAuth?.data?.id as string).then(friends => handleFriends(friends))
+            }
+            } />
+            :
+            suggestedUsers.length > 0 ?
+              <View>
+                <Text style={{ fontSize: 20, fontWeight: '600', color: 'orange', padding: 10 }}>Suggestion</Text>
+                <UserList data={suggestedUsers} handleUsers={(users) => {
+                  setSuggestedUsers(users)
+                  fetchFriends(currentAuth?.data?.id as string).then(friends => handleFriends(friends))
+                }} />
+              </View>
+              :
+              isLoading ?
+                <Loading />
+                :
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ padding: 10, borderRadius: 5, color: 'orange', fontSize: 30, fontWeight: '600' }}>Search for users</Text>
+                </View>
+        }
+      </View>
+
+    </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'orange'
-  },
-  searchContainer: {
-  },
-  searchTitle: {
-    color: 'orange',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  profilePic: {
-    height: 50,
-    width: 50,
-    borderRadius: 50 / 2,
-    position: 'absolute',
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-  }
-})
-
-

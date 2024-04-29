@@ -26,7 +26,7 @@ const loginReducer = (state: State<AuthType>, action: Action<AuthAction, AuthTyp
     case AuthAction.LOGIN:
     case AuthAction.UPDATE:
       return {
-        ...state, isLoading: false, isError: false, data: { id: action.payload?.id, displayName: action.payload?.displayName, email: action.payload?.email, token: action.payload?.token }
+        ...state, isLoading: false, isError: false, data: { id: action.payload?.id, displayName: action.payload?.displayName, email: action.payload?.email, token: action.payload?.token, photoUrl: action.payload?.photoUrl }
       }
     case AuthAction.LOGOUT:
       return {
@@ -50,7 +50,7 @@ export default ({ children }: AuthProviderProps) => {
       if (user) {
 
         user.getIdToken().then(t => {
-          dispatch({ type: AuthAction.LOGIN, payload: { id: user.uid, email: user.email, displayName: user.displayName, token: t } })
+          dispatch({ type: AuthAction.LOGIN, payload: { id: user.uid, email: user.email, displayName: user.displayName, token: t, photoUrl: user.photoURL } })
         })
       } else {
         console.log("user logged out")

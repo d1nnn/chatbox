@@ -12,7 +12,6 @@ import useGroups from "../hooks/useGroups";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import ProfileImage from "../components/ProfileImage";
-import { GroupAction } from "../constants/group";
 
 
 const ChatScreen = ({ navigation }) => {
@@ -22,6 +21,7 @@ const ChatScreen = ({ navigation }) => {
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
   const [groupName, setGroupName] = useState("")
+  console.log(currentUser.data)
 
 
 
@@ -74,13 +74,12 @@ const ChatScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 10 }}>
-        <TouchableOpacity onPress={() => { console.log('click'); navigation.navigate('Profile'); }}>
-          <Image source={profilepic} style={styles.profilePic} />
+        <TouchableOpacity onPress={() => { console.log('click'); navigation?.navigate('Profile'); }}>
+          <Image source={(currentUser && currentUser.data && (currentUser.data.photoUrl !== "")) ? { uri: currentUser.data.photoUrl } : profilepic} style={styles.profilePic} />
         </TouchableOpacity>
         <Text style={styles.title}>Boxes</Text>
         <MaterialIcons name="library-add" size={28} color="orange" style={{ marginLeft: 'auto', marginRight: 20 }} onPress={() => { navigation.navigate("CreateGroup") }} />
       </View>
-      <SignOutBtn />
       <View style={{ flex: 10 }}>
         {
           currentGroups?.isLoading ?
@@ -122,6 +121,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 40 / 2,
+    borderColor: 'orange',
+    borderWidth: 0.5,
   },
   empty: {
     flex: 10,
