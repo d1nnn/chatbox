@@ -148,7 +148,7 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
           setNameEditing(prev => !prev)
           setGroupIsUpdating(true)
         }} />
-        <InfoItem color="orange" icon="users" title="See boxers" data={{ quantity: currentGroup.quantity, newUsers: chosenUsers }} handleClick={() => {
+        <InfoItem color="orange" icon="users" title="See boxers" data={{ quantity: currentGroup?.users?.length, newUsers: chosenUsers }} handleClick={() => {
           getBoxers()
         }} />
         <InfoItem color="orange" icon="image-inverted" title="Change box picture" handleClick={() => {

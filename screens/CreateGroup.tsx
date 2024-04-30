@@ -25,11 +25,11 @@ export default function CreateGroup({ navigation, route }: NavigationProp): Reac
 
   function chooseUser(id: string) {
     setChosenUsers(prev => {
-      const user = prev.find(u => u.id === id)
+      const user = prev.find(u => u?.id === id)
       if (user)
-        return prev.filter(u => u.id !== id)
+        return prev.filter(u => u?.id !== id)
 
-      const chosenUser = users.find(u => u.id === id)
+      const chosenUser = users.find(u => u?.id === id)
       return [...prev, chosenUser] as UserType[]
     })
   }
@@ -37,17 +37,16 @@ export default function CreateGroup({ navigation, route }: NavigationProp): Reac
   function search() {
     setSearchOpened(true)
     searchUsers(currentAuth?.data?.id + "", textInput).then((userList) => {
-      let list = userList.filter((user) => user.id !== currentAuth?.data?.id)
+      let list = userList.filter((user) => user?.id !== currentAuth?.data?.id)
       setUsers(list)
     })
   }
 
   async function sendAndCreate() {
-    const users = chosenUsers.map(u => u.id)
+    const users = chosenUsers.map(u => u?.id).filter(u => u)
     const group = await createGroup({
       currentUserid: currentAuth.data?.id as string,
       message: messageTextInput,
-      quantity: chosenUsers?.length,
       groupName,
       otherUsers: users as string[]
     })

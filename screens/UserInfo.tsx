@@ -9,6 +9,8 @@ import { UserType } from "../types/UserTypes";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { addFriend, unfriend } from "../api/users";
 import useLogin from "../hooks/useLogin";
+import { fetchGroup, fetchGroupFromUsers } from "../api/groups";
+import { GroupType } from "../types/GroupTypes";
 
 const { width, height } = Dimensions.get('window')
 
@@ -18,8 +20,20 @@ export default function UserInfo({ navigation, route }: NavigationProp): React.J
   const [currentUserChosen, setCurrentUserChosen] = useState(user)
   const [unfriendIsOpened, setUnfriendIsOpened] = useState(false)
 
+  function talkTo() {
+    const group = fetchGroupFromUsers(currentAuth?.data?.id as string, currentUserChosen.id as string)
+    group.then(g => {
+      if (g) {
+        navigation?.navigate("ChatRoom", g)
+      } else {
+        navigation?.navigate("CreateGroup", currentUserChosen)
+      }
+    }
+    )
+  }
+
   useEffect(() => {
-    if (user.id === currentAuth?.data?.id)
+    if (user?.id === currentAuth?.data?.id)
       navigation?.navigate("Profile")
   }, [])
 
@@ -70,7 +84,7 @@ export default function UserInfo({ navigation, route }: NavigationProp): React.J
           </TouchableOpacity>
           )
         }
-        <TouchableOpacity onPress={() => navigation?.navigate("CreateGroup", currentUserChosen)}>
+        <TouchableOpacity onPress={talkTo}>
           <Text style={{ padding: 10, paddingHorizontal: 20, backgroundColor: '#222', color: '#999', fontSize: 18, borderRadius: 5, borderColor: '#999', borderWidth: 0.2 }}>Message</Text>
         </TouchableOpacity>
 

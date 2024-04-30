@@ -36,6 +36,8 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
 
   // const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
+    if(textInput.length === 0)
+      return
     const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id + "", createdAt: Timestamp.now().toDate() })
     setTextInput("")
   }

@@ -18,8 +18,27 @@ export type DispatchOptions = {
 
 export async function fetchGroup(groupid: string): Promise<GroupType> {
   const groupQuery = doc(db, "groups", groupid)
-  var groupResult = (await getDoc(groupQuery)).data() as GroupType
-  return groupResult
+  var groupResult = (await getDoc(groupQuery)).data()
+  let users = convertUsersObjToArray(groupResult?.users)
+  let realGroup: GroupType = {...groupResult, users}
+  return realGroup as GroupType
+}
+export async function fetchGroupFromUsers(authId: string, userid: string): Promise<GroupType | null | undefined> {
+  
+
+  const groupQuery = query(collection(db, "groups"),where(`users.${authId}`, "==", true), where(`users.${userid}`, "==", true), where("quantity", "==", 2))
+
+  const groupPromise = (await getDocs(groupQuery)).docs.map(async g => {
+    let groupResult = g.data()
+    let users: string[] = convertUsersObjToArray(g.data())
+    return {...groupResult as GroupType, users}
+  })
+
+  const groupList = await Promise.all(groupPromise)
+  if(groupList.length == 1)
+    return groupList.pop() as GroupType
+
+  return null
 }
 
 export async function fetchGroups(
@@ -35,7 +54,7 @@ export async function fetchGroups(
   let userResult: UserType
 
   if (option && option.userid) {
-    groupQuery = query(collection(db, "groups"), where("users", "array-contains", option.userid))
+    groupQuery = query(collection(db, "groups"), where(`users.${option.userid}`, "==", true))
   } else {
     groupQuery = query(collection(db, "groups"));
   }
@@ -71,9 +90,11 @@ export async function fetchGroups(
       const unreadGroup = userResult?.unread?.find(u => u.groupid === groupResult.id)
       groupResult.isRead = unreadGroup?.isRead
       groupResult.groupName = await getGroupName(option.userid as string, groupResult)
+      const users = convertUsersObjToArray(groupResult?.users)
+      let realGroup: GroupType = {...groupResult, users}
 
 
-      return groupResult
+      return realGroup
     })
 
     groupList = await Promise.all(futureGroup)
@@ -83,6 +104,14 @@ export async function fetchGroups(
   })
 
   return unsub
+}
+
+export function convertUsersObjToArray(users: {[key: string]: boolean}): string[] {
+  return Object.keys(users) 
+}
+
+export function convertUsersArrayToObj(users: string[]): {[key: string]: boolean} {
+  return Object.fromEntries(users.map(k => [k, true]))
 }
 
 export async function fetchUnreadGroups(userid: string, dispatchOptions: DispatchOptions): Promise<Unsubscribe> {
@@ -117,9 +146,9 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       groupResult.latestMessage = messageResult?.content
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
       groupResult.isRead = unreadGroup?.isRead
-
-
-      return groupResult
+      let users = convertUsersObjToArray(groupResult?.users)
+      let realGroup: GroupType = {...groupResult, users}
+      return realGroup
     })
 
     groupList = (await Promise.all(futureGroup)).filter(g => g !== null)
@@ -135,7 +164,6 @@ type CreateGroupType = {
   currentUserid: string
   groupName: string,
   message: string,
-  quantity: number,
   otherUsers: string[]
 }
 
@@ -146,16 +174,20 @@ export async function createGroup(
     currentUserid,
     groupName,
     message,
-    quantity,
     otherUsers
   }: CreateGroupType): Promise<GroupType> {
   let uid = uuidv4()
   let groupRef = doc(db, "groups", uid)
 
   const allUsers = [...otherUsers, currentUserid]
+  // let usersObj = Object.fromEntries(allUsers.map(k => [k, true]))
+  console.log("ALL USERS: ", allUsers)
+  console.log()
+  let usersObj = convertUsersArrayToObj(allUsers)
+  
 
 
-  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity: allUsers.length, users: allUsers, photoUrl: groupPhotoUrl })
+  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity: allUsers.length, users: usersObj, photoUrl: groupPhotoUrl })
 
   await addMessage({ groupid: uid, userid: currentUserid, isFile: false, content: message, createdAt: Timestamp.now().toDate() })
 
@@ -208,7 +240,7 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
 
 export async function getGroupName(currentUserId: string, group: GroupType): Promise<string> {
   const groupRef = doc(db, "groups", group.id as string)
-  const groupResult = (await getDoc(groupRef)).data() as GroupType
+  const groupResult = (await getDoc(groupRef)).data()
   if (groupResult?.groupName && groupResult.groupName as string !== "") {
     return groupResult.groupName as string
   }
@@ -241,11 +273,13 @@ export async function getGroupName(currentUserId: string, group: GroupType): Pro
 
 export async function updateGroup(groupid: string, payload: GroupType): Promise<GroupType> {
   const groupRef = doc(db, "groups", groupid)
+  
 
   try {
+    
     await updateDoc(groupRef, {
       groupName: payload.groupName,
-      users: payload.users,
+      users: convertUsersArrayToObj(payload.users as string[]),
       quantity: payload?.users?.length,
       photoUrl: payload.photoUrl
     })

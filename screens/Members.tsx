@@ -17,7 +17,7 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
   const [combinedUsers, setCombinedUsers] = useState<UserType[]>([...chosenGroupUsers, ...currentGroupUsers])
 
   function handleChooseUser(user: UserType) {
-    if (user.id !== currentAuth?.data?.id)
+    if (user?.id !== currentAuth?.data?.id)
       navigation?.navigate("UserInfo", user)
     else
       navigation?.navigate("Profile")
@@ -34,11 +34,14 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
           <View>
             <View>
               <Text style={styles.userText}>{user.displayName}</Text>
+              {
+                currentAuth?.data?.id !== user.id &&
               <Text style={styles.mutual}>{user.mutualCount > 0 && `${user.mutualCount} mutual friend`} </Text>
+              }
             </View>
           </View>
           {
-            !user.isFriend && !(user.id === currentAuth?.data?.id) && !yetUpdate &&
+            !user.isFriend && !(user?.id === currentAuth?.data?.id) && !yetUpdate &&
             <TouchableOpacity
               style={styles.addFriendBtn}
               onPress={() => {
@@ -75,7 +78,7 @@ export default function Members({ navigation, route }: NavigationProp): React.JS
           {
             currentUser && currentGroupUsers.length !== 0 &&
             currentGroupUsers.map((user, i) => {
-              const friend = currentUser.friends.find(id => id === user.id)
+              const friend = currentUser.friends.find(id => id === user?.id)
               if (!friend) {
                 return (
                   <User key={i} user={user} />

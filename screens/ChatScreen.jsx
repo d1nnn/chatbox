@@ -21,8 +21,9 @@ const ChatScreen = ({ navigation }) => {
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
   const [groupName, setGroupName] = useState("")
-  console.log(currentUser.data)
 
+  console.log("CURRENT gROUP",currentGroups)
+  console.log()
 
 
   useEffect(() => {
@@ -88,7 +89,7 @@ const ChatScreen = ({ navigation }) => {
             currentGroups?.data?.length == 0 ?
               <View style={styles.empty}>
                 <Text style={styles.emptyText}>Your history is empty. Start a group chat?</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation?.navigate("CreateGroup")}>
                   <Text style={styles.btnText}>Create Group</Text>
                 </TouchableOpacity>
               </View>

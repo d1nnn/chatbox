@@ -19,7 +19,7 @@ export default function UserList({ data, handleUsers }: FriendListType): React.J
   const navigation = useNavigation()
 
   function addThisFriend(user: UserType) {
-    addFriend(currentAuth?.data?.id as string, user.id as string).then(u => {
+    addFriend(currentAuth?.data?.id as string, user?.id as string).then(u => {
       console.log("FOLLOWED: ", u)
       console.log()
       if (handleUsers) {

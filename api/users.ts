@@ -1,9 +1,10 @@
-import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "@firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "@firebase/firestore";
 import { UserType } from "../types/UserTypes";
 import { db } from "../configs/firebaseConfig";
 import { CurrentUserOption } from "../types/Options";
 import { UserAction } from "../constants/user";
 import { GroupType } from "../types/GroupTypes";
+import { convertUsersObjToArray } from "./groups";
 
 
 export async function fetchUsersFromGroup(currentUserid: string, group: GroupType): Promise<UserType[]> {
@@ -17,12 +18,14 @@ export async function fetchUsersFromGroup(currentUserid: string, group: GroupTyp
       const userQuery = doc(db, "users", id)
       const userResult = (await getDoc(userQuery)).data() as UserType
       let counter = getMutualCount(userResult, currentUserResult)
+      if(userResult) {
       const friend = currentUserResult.friends.find(id => id === userResult.id)
       if (friend)
         userResult.isFriend = true
 
       userResult.mutualCount = counter
       userList.push(userResult as UserType)
+    }
     })
   }
   await Promise.all(promise)
@@ -177,6 +180,13 @@ export async function leaveGroup(currentUserId: string, groupId: string) {
     await updateDoc(groupRef, {
       users: arrayRemove(currentUserId)
     })
+
+    const groupResult = (await getDoc(groupRef)).data()
+    const users = convertUsersObjToArray(groupResult?.users)
+
+    if(users.length === 0) {
+      await deleteDoc(groupRef)
+    }
   } catch (err) {
     console.error(err)
   }
