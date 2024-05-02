@@ -5,6 +5,7 @@ import { CurrentUserOption } from "../types/Options";
 import { UserAction } from "../constants/user";
 import { GroupType } from "../types/GroupTypes";
 import { convertUsersObjToArray } from "./groups";
+import { Alert } from "react-native";
 
 
 export async function fetchUsersFromGroup(currentUserid: string, group: GroupType): Promise<UserType[]> {
@@ -12,20 +13,22 @@ export async function fetchUsersFromGroup(currentUserid: string, group: GroupTyp
   const currentUserQuery = doc(db, "users", currentUserid)
   const currentUserResult = (await getDoc(currentUserQuery)).data() as UserType
 
+  console.log("fetchUsersGroupGroup called: ", group)
+  console.log()
 
   if (group?.users?.length !== 0) {
     var promise: any = group?.users?.map(async id => {
       const userQuery = doc(db, "users", id)
       const userResult = (await getDoc(userQuery)).data() as UserType
       let counter = getMutualCount(userResult, currentUserResult)
-      if(userResult) {
-      const friend = currentUserResult.friends.find(id => id === userResult.id)
-      if (friend)
-        userResult.isFriend = true
+      if (userResult) {
+        const friend = currentUserResult.friends.find(id => id === userResult.id)
+        if (friend)
+          userResult.isFriend = true
 
-      userResult.mutualCount = counter
-      userList.push(userResult as UserType)
-    }
+        userResult.mutualCount = counter
+        userList.push(userResult as UserType)
+      }
     })
   }
   await Promise.all(promise)
@@ -81,7 +84,7 @@ export async function searchUsers(currentUserId: string, displayName: string): P
       return userResult as UserType
     })
     userList = await Promise.all(promise)
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
   }
 
@@ -184,7 +187,7 @@ export async function leaveGroup(currentUserId: string, groupId: string) {
     const groupResult = (await getDoc(groupRef)).data()
     const users = convertUsersObjToArray(groupResult?.users)
 
-    if(users.length === 0) {
+    if (users.length === 0) {
       await deleteDoc(groupRef)
     }
   } catch (err) {

@@ -20,22 +20,22 @@ export async function fetchGroup(groupid: string): Promise<GroupType> {
   const groupQuery = doc(db, "groups", groupid)
   var groupResult = (await getDoc(groupQuery)).data()
   let users = convertUsersObjToArray(groupResult?.users)
-  let realGroup: GroupType = {...groupResult, users}
+  let realGroup: GroupType = { ...groupResult, users }
   return realGroup as GroupType
 }
 export async function fetchGroupFromUsers(authId: string, userid: string): Promise<GroupType | null | undefined> {
-  
 
-  const groupQuery = query(collection(db, "groups"),where(`users.${authId}`, "==", true), where(`users.${userid}`, "==", true), where("quantity", "==", 2))
+
+  const groupQuery = query(collection(db, "groups"), where(`users.${authId}`, "==", true), where(`users.${userid}`, "==", true), where("quantity", "==", 2))
 
   const groupPromise = (await getDocs(groupQuery)).docs.map(async g => {
     let groupResult = g.data()
     let users: string[] = convertUsersObjToArray(g.data())
-    return {...groupResult as GroupType, users}
+    return { ...groupResult as GroupType, users }
   })
 
   const groupList = await Promise.all(groupPromise)
-  if(groupList.length == 1)
+  if (groupList.length == 1)
     return groupList.pop() as GroupType
 
   return null
@@ -77,7 +77,7 @@ export async function fetchGroups(
       const firstGroupMessageRef = query(collection(db, "messages"), where("groupid", "==", groupResult.id), orderBy("createdAt", "desc"), limit(1))
       let messageResult;
       try {
-        const res = (await getDocs(firstGroupMessageRef)).docs[0].data()
+        const res = (await getDocs(firstGroupMessageRef)).docs[0]?.data()
         messageResult = res
 
       } catch (err) {
@@ -91,7 +91,7 @@ export async function fetchGroups(
       groupResult.isRead = unreadGroup?.isRead
       groupResult.groupName = await getGroupName(option.userid as string, groupResult)
       const users = convertUsersObjToArray(groupResult?.users)
-      let realGroup: GroupType = {...groupResult, users}
+      let realGroup: GroupType = { ...groupResult, users }
 
 
       return realGroup
@@ -106,11 +106,11 @@ export async function fetchGroups(
   return unsub
 }
 
-export function convertUsersObjToArray(users: {[key: string]: boolean}): string[] {
-  return Object.keys(users) 
+export function convertUsersObjToArray(users: { [key: string]: boolean }): string[] {
+  return Object.keys(users)
 }
 
-export function convertUsersArrayToObj(users: string[]): {[key: string]: boolean} {
+export function convertUsersArrayToObj(users: string[]): { [key: string]: boolean } {
   return Object.fromEntries(users.map(k => [k, true]))
 }
 
@@ -147,7 +147,7 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
       groupResult.isRead = unreadGroup?.isRead
       let users = convertUsersObjToArray(groupResult?.users)
-      let realGroup: GroupType = {...groupResult, users}
+      let realGroup: GroupType = { ...groupResult, users }
       return realGroup
     })
 
@@ -184,7 +184,7 @@ export async function createGroup(
   console.log("ALL USERS: ", allUsers)
   console.log()
   let usersObj = convertUsersArrayToObj(allUsers)
-  
+
 
 
   await setDoc(groupRef, { id: uid, groupName, messages: [], quantity: allUsers.length, users: usersObj, photoUrl: groupPhotoUrl })
@@ -273,10 +273,10 @@ export async function getGroupName(currentUserId: string, group: GroupType): Pro
 
 export async function updateGroup(groupid: string, payload: GroupType): Promise<GroupType> {
   const groupRef = doc(db, "groups", groupid)
-  
+
 
   try {
-    
+
     await updateDoc(groupRef, {
       groupName: payload.groupName,
       users: convertUsersArrayToObj(payload.users as string[]),
@@ -286,8 +286,10 @@ export async function updateGroup(groupid: string, payload: GroupType): Promise<
   } catch (err) {
     console.error(err)
   }
-  const group = (await getDoc(groupRef)).data() as GroupType
-  return group
+  const groupResult = (await getDoc(groupRef)).data()
+  const users = convertUsersObjToArray(groupResult?.users)
+  const realGroup = { ...groupResult, users }
+  return realGroup
 }
 
 export async function addGroupToUser(userid: string, groupid: string) {

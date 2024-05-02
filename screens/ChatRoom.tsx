@@ -1,21 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Image, NativeSyntheticEvent, TextInputChangeEventData, Pressable } from "react-native";
-import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { Text, View, Dimensions, StyleSheet, TextInput, TouchableWithoutFeedback, KeyboardAvoidingView, ScrollView, Image, } from "react-native";
+import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { NavigationProp } from "../props/Navigation";
 import { MessageType } from "../types/MessageTypes";
 import useLogin from "../hooks/useLogin";
 import BackBtn from "../components/BackBtn";
-import { addMessage, fetchMessage, fetchMessages } from "../api/messages";
-import { fetchUser, fetchUsersFromGroup } from "../api/users";
-import { UserType } from "../types/UserTypes";
+import { addMessage, fetchMessages } from "../api/messages";
 import { useIsFocused } from "@react-navigation/native";
 import { Timestamp } from "@firebase/firestore";
 import useUsers, { UserCtx } from "../hooks/useUsers";
 import { GroupType } from "../types/GroupTypes";
 import { fetchGroup, getGroupName } from "../api/groups";
-import ProfileImage from "../components/ProfileImage";
 import { FlatList } from "react-native-gesture-handler";
-import { ListItem } from "react-native-elements";
 import Loading from "./Loading";
 
 const { width, height } = Dimensions.get('window')
@@ -36,7 +32,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
 
   // const fetchMessagesCallback = useCallback(fetchMessages, [isFocused])
   const sendMessage = async () => {
-    if(textInput.length === 0)
+    if (textInput.length === 0)
       return
     const id = await addMessage({ content: textInput, userid: currentUser?.data?.id + "", isFile: false, groupid: group?.id + "", createdAt: Timestamp.now().toDate() })
     setTextInput("")
@@ -87,23 +83,19 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   }, [isFocused])
 
   return (
-    <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1, width }}>
-      <BackBtn goTo={() => navigation?.navigate("Home")} />
-      <FontAwesome5
-        name="info-circle"
-        size={24} color="orange"
-        style={{
-          position: "absolute",
-          top: 62,
-          right: 20,
-          zIndex: 10
-        }}
-        onPress={() => { navigation?.navigate("GroupInfo", group) }}
-      />
-      <View style={styles.container}>
+    <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1, width, backgroundColor: '#111' }}>
+      <View style={{ width, flexDirection: 'row', justifyContent: 'space-between', padding: 10, marginTop: 30, position: 'absolute', top: 0, zIndex: 10, alignItems: 'center', gap: 10 }}>
+        <Ionicons name="arrow-back-outline" size={24} color="orange" onPress={() => navigation?.goBack()} />
         <View style={styles.groupInfo}>
           <Text style={styles.groupName}>{groupName}</Text>
         </View>
+        <FontAwesome5
+          name="info-circle"
+          size={24} color="orange"
+          onPress={() => { navigation?.navigate("GroupInfo", group) }}
+        />
+      </View>
+      <View style={styles.container}>
         {
           isLoading &&
           <Loading />
@@ -114,7 +106,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
           <FlatList
             renderItem={renderItem}
             data={messages}
-            contentContainerStyle={{ width, justifyContent: 'flex-start', flexDirection: 'column', padding: 20, gap: 20, paddingTop: 70, flexGrow: 1 }}
+            contentContainerStyle={{ width, justifyContent: 'flex-start', flexDirection: 'column', padding: 20, gap: 20, flexGrow: 1 }}
             onStartReached={() => {
               setIsLoading(true)
               fetchMessages(group?.id as string, limit + 10, setMessages).then(unsub => {
@@ -179,8 +171,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#111',
-    height: height * 95 / 100,
+    height: height * 80 / 100,
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     overflow: 'hidden',
@@ -227,18 +218,13 @@ const styles = StyleSheet.create({
   },
   groupInfo: {
     backgroundColor: '#333',
-    zIndex: 3,
-    position: 'absolute',
-    top: 0,
-    width,
     padding: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: 5,
   },
   groupName: {
     color: 'orange',
     fontSize: 20,
     fontWeight: '700',
+    maxWidth: 200
   }
 })

@@ -56,13 +56,6 @@ export default function Friends({ navigation }: NavigationProp): React.JSX.Eleme
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => {
-        setIsSearchOpened(false)
-        navigation?.goBack()
-      }}
-      >
-        <Ionicons name="arrow-back-outline" size={24} color="orange" />
-      </TouchableOpacity>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Friends ({friends.length})</Text>
         <TouchableOpacity onPress={() => {
@@ -100,8 +93,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 32,
-    marginTop: 50,
+    paddingTop: 60,
   },
   title: {
     fontSize: 24,

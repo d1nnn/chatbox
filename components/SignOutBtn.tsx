@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableWithoutFeedback, Alert } from "react-native";
 import firebaseApi from '../configs/firebaseConfig'
 import useGroups from "../hooks/useGroups";
 import { GroupAction } from "../constants/group";
@@ -20,7 +20,20 @@ export default function SignOutBtn() {
     })
   }
   return (
-    <TouchableWithoutFeedback style={styles.signOut} onPress={signOut}>
+    <TouchableWithoutFeedback style={styles.signOut} onPress={() => {
+
+      Alert.alert('Escape the app', 'Getting bored? Exit this app?', [
+        {
+          text: 'OK',
+          onPress: () => { signOut() },
+        },
+        {
+          text: 'Cancel', onPress: () => { },
+          style: 'cancel',
+        },
+      ]);
+      signOut
+    }}>
       <Text style={styles.signOutText}>Sign out</Text>
     </TouchableWithoutFeedback>
   )

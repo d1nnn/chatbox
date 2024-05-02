@@ -4,7 +4,6 @@ import { ListItem, Avatar } from "react-native-elements";
 import useLogin from "../hooks/useLogin";
 import useUsers, { UserCtx } from "../hooks/useUsers";
 import profilepic from "../assets/profilepic.png"
-import SignOutBtn from "../components/SignOutBtn"
 import { fetchGroups, getGroupName, updateReadGroup } from "../api/groups";
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import Loading from '../screens/Loading'
@@ -13,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import ProfileImage from "../components/ProfileImage";
 
+const DEFAULT_IMAGE = require("../assets/profilepic.png")
 
 const ChatScreen = ({ navigation }) => {
   const isFocused = useIsFocused()
@@ -21,10 +21,6 @@ const ChatScreen = ({ navigation }) => {
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
   const [groupName, setGroupName] = useState("")
-
-  console.log("CURRENT gROUP",currentGroups)
-  console.log()
-
 
   useEffect(() => {
 

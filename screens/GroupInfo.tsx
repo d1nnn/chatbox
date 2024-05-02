@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Dimensions, TextInput } from "react-native";
+import { StyleSheet, Text, View, Dimensions, TextInput, Alert } from "react-native";
 import { NavigationProp } from "../props/Navigation";
 import { GroupType } from "../types/GroupTypes";
-import BackBtn from "../components/BackBtn";
 import ProfileImage from "../components/ProfileImage";
 import { AntDesign, Entypo, Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import InfoItem from "../components/InfoItem";
@@ -11,9 +10,10 @@ import { fetchUsersFromGroup, leaveGroup, searchUsers } from "../api/users";
 import useLogin from "../hooks/useLogin";
 import UserChoices from "../components/UserChoices";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { updateDoc } from "@firebase/firestore";
 import { addGroupToUser, updateGroup } from "../api/groups";
 import { chooseImage } from "../utils/image";
+import CustomModal from "../components/CustomModal";
+
 
 const { width, height } = Dimensions.get('window')
 
@@ -23,13 +23,15 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
   const [currentGroup, setCurrentGroup] = useState<GroupType>(group)
   const [payload, setPayload] = useState<GroupType>(group)
   const [chosenUsers, setChosenUsers] = useState<UserType[]>([])
+  const [groupUsers, setGroupUsers] = useState<UserType[]>([])
   const [searchedUsers, setSearchedUsers] = useState<UserType[]>([])
+
   const [groupIsUpdating, setGroupIsUpdating] = useState<boolean>(false)
   const [nameEditing, setNameEditing] = useState<boolean>(false)
   const [searchOpened, setSearchOpened] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>("")
-  const [groupUsers, setGroupUsers] = useState<UserType[]>([])
   const [image, setImage] = useState<{ uri?: string, fileName: string }>({ uri: currentGroup.photoUrl, fileName: "" })
+  const [popupIsOpened, setPopupIsOpened] = useState(false)
 
 
   function search() {
@@ -62,12 +64,17 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
 
 
   useEffect(() => {
+    console.log(currentGroup)
     fetchUsersFromGroup(currentAuth?.data?.id as string, currentGroup).then(userList => setGroupUsers(userList))
   }, [currentGroup])
 
   return (
     <View style={styles.container}>
-      <BackBtn goTo={() => { navigation?.goBack() }} />
+      <View style={{ alignSelf: 'flex-start' }}>
+        <TouchableOpacity onPress={() => navigation?.goBack()} >
+          <Ionicons name="arrow-back-outline" size={24} color="orange" />
+        </TouchableOpacity>
+      </View>
       {
         groupIsUpdating &&
         <View style={styles.prompt}>
@@ -163,7 +170,16 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
       </View>
       <View style={{ marginTop: 50 }}>
         <InfoItem icon="" title="Leave box" color="red" handleClick={() => {
-          leaveGroup(currentAuth?.data?.id as string, currentGroup?.id as string).then(() => navigation?.navigate("Home"))
+          Alert.alert('Escape the box', 'Do you want to free yourself from this box?', [
+            {
+              text: 'OK',
+              onPress: () => { leaveGroup(currentAuth?.data?.id as string, currentGroup?.id as string).then(() => navigation?.navigate("Home")) },
+            },
+            {
+              text: 'Cancel', onPress: () => { },
+              style: 'cancel',
+            },
+          ]);
         }} />
       </View>
 
@@ -210,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     gap: 20,
-    paddingTop: 120,
+    paddingTop: 40,
     paddingHorizontal: 30,
     paddingBottom: 30,
     minHeight: height,
