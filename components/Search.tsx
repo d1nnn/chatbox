@@ -60,11 +60,14 @@ export default function Search({ handleFriends }: SearchType): React.JSX.Element
 
         {
           searchedUsers.length > 0 ?
-            <UserList data={searchedUsers} handleUsers={(users) => {
-              setSearchedUsers(users)
-              fetchFriends(currentAuth?.data?.id as string).then(friends => handleFriends(friends))
-            }
-            } />
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: '600', color: 'orange', padding: 10 }}>Search Result</Text>
+              <UserList data={searchedUsers} handleUsers={(users) => {
+                setSearchedUsers(users)
+                fetchFriends(currentAuth?.data?.id as string).then(friends => handleFriends(friends))
+              }
+              } />
+            </View>
             :
             suggestedUsers.length > 0 ?
               <View>

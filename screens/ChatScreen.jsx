@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, Button, TouchableOpacity, ScrollView, Dimensions } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import useLogin from "../hooks/useLogin";
 import useUsers, { UserCtx } from "../hooks/useUsers";
@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import ProfileImage from "../components/ProfileImage";
 
 const DEFAULT_IMAGE = require("../assets/profilepic.png")
+const { width, height } = Dimensions.get('window')
 
 const ChatScreen = ({ navigation }) => {
   const isFocused = useIsFocused()
@@ -21,6 +22,8 @@ const ChatScreen = ({ navigation }) => {
   const { state: user, dispatch: dispatchUser } = useUsers(UserCtx.UserType)
   const { state: currentGroups, dispatch: dispatchGroups } = useGroups()
   const [groupName, setGroupName] = useState("")
+
+  console.log("CURRENT GROUP:", currentGroups?.data)
 
   useEffect(() => {
 
@@ -91,6 +94,7 @@ const ChatScreen = ({ navigation }) => {
               </View>
               :
               <FlatList
+                contentContainerStyle={{ width, justifyContent: 'flex-start', flexDirection: 'column', padding: 20, flexGrow: 1 }}
                 data={currentGroups?.data}
                 keyExtractor={(item) => item?.id}
                 renderItem={(item) => renderItem(item, navigation, currentUser?.data?.id + "", groupName, setGroupName)}
@@ -106,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#111",
     paddingTop: 32,
-    marginTop: 50,
+    marginTop: 30,
   },
   title: {
     fontSize: 24,

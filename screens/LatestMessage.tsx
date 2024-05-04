@@ -22,6 +22,8 @@ export default function LatestMessage({ navigation }: NavigationProp): React.JSX
   const isFocused = useIsFocused()
   const { hasLatestMessage, handleLatestMessage } = useHasLatestMessage()
 
+  console.log("Unread Groups: ", currentGroups?.data)
+
 
   function removeMessage(id: string) {
     if (!id)

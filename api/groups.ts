@@ -18,7 +18,9 @@ export type DispatchOptions = {
 
 export async function fetchGroup(groupid: string): Promise<GroupType> {
   const groupQuery = doc(db, "groups", groupid)
+  console.log("GroupID: ", groupid)
   var groupResult = (await getDoc(groupQuery)).data()
+  console.log("Group Result: ", groupResult)
   let users = convertUsersObjToArray(groupResult?.users)
   let realGroup: GroupType = { ...groupResult, users }
   return realGroup as GroupType
@@ -117,7 +119,7 @@ export function convertUsersArrayToObj(users: string[]): { [key: string]: boolea
 export async function fetchUnreadGroups(userid: string, dispatchOptions: DispatchOptions): Promise<Unsubscribe> {
   const { dispatchUser, dispatchGroups } = dispatchOptions
   const userRef = doc(db, "users", userid)
-  const groupQuery = query(collection(db, "groups"), where("users", "array-contains", userid))
+  const groupQuery = query(collection(db, "groups"), where(`users.${userid}`, "==", true))
   const userResult = (await getDoc(userRef)).data()
 
   if (dispatchUser) {
@@ -146,12 +148,14 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       groupResult.latestMessage = messageResult?.content
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
       groupResult.isRead = unreadGroup?.isRead
+      groupResult.groupName = await getGroupName(userid, groupResult)
       let users = convertUsersObjToArray(groupResult?.users)
       let realGroup: GroupType = { ...groupResult, users }
       return realGroup
     })
 
     groupList = (await Promise.all(futureGroup)).filter(g => g !== null)
+    console.log("Group list: ", groupList)
 
     if (dispatchGroups) {
       dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
@@ -187,7 +191,7 @@ export async function createGroup(
 
 
 
-  await setDoc(groupRef, { id: uid, groupName, messages: [], quantity: allUsers.length, users: usersObj, photoUrl: groupPhotoUrl })
+  await setDoc(groupRef, { id: uid, groupName: allUsers.length == 2 ? "" : groupName, messages: [], quantity: allUsers.length, users: usersObj, photoUrl: groupPhotoUrl })
 
   await addMessage({ groupid: uid, userid: currentUserid, isFile: false, content: message, createdAt: Timestamp.now().toDate() })
 
@@ -214,6 +218,7 @@ export async function updateReadGroup(userid: string, groupid: string, dispatchO
     const newUnread = userResult?.unread?.map((u: any) => {
       if (u.groupid == groupid)
         return null
+      return u
     }).filter((u: any) => u !== null)
     try {
       if (newUnread)

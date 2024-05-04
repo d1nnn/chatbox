@@ -168,7 +168,7 @@ export default function GroupInfo({ navigation, route }: NavigationProp): React.
         }} />
 
       </View>
-      <View style={{ marginTop: 50 }}>
+      <View >
         <InfoItem icon="" title="Leave box" color="red" handleClick={() => {
           Alert.alert('Escape the box', 'Do you want to free yourself from this box?', [
             {

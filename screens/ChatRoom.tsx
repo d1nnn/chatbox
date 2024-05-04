@@ -85,7 +85,7 @@ export default function ChatRoom({ navigation, route }: NavigationProp): React.J
   return (
     <KeyboardAvoidingView behavior="height" style={{ justifyContent: 'flex-end', flex: 1, width, backgroundColor: '#111' }}>
       <View style={{ width, flexDirection: 'row', justifyContent: 'space-between', padding: 10, marginTop: 30, position: 'absolute', top: 0, zIndex: 10, alignItems: 'center', gap: 10 }}>
-        <Ionicons name="arrow-back-outline" size={24} color="orange" onPress={() => navigation?.goBack()} />
+        <Ionicons name="arrow-back-outline" size={24} color="orange" onPress={() => navigation?.navigate("Home")} />
         <View style={styles.groupInfo}>
           <Text style={styles.groupName}>{groupName}</Text>
         </View>

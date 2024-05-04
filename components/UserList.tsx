@@ -75,7 +75,7 @@ export default function UserList({ data, handleUsers }: FriendListType): React.J
   }
 
   return (
-    <View style={{ height: height / 1.5 }}>
+    <View style={{ height: height / 1.7 }}>
       <FlatList
         renderItem={(item) => renderItem(item, navigation)}
         data={data}
