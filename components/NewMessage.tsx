@@ -63,7 +63,7 @@ export default function NewMessage({ length, rotate, scale, data }: NewMessagePr
           <Image source={{ uri: data.photoUrl }} style={styles.photo} />
         </View>
         <Text style={styles.displayName}>@{data.groupName}</Text>
-        <Text style={styles.message}>{data?.latestMessage?.length ?? 0 < 60 ? data.latestMessage : data?.latestMessage?.slice(0, 60) + "..."}</Text>
+        <Text style={styles.message}>{data?.latestMessage?.content?.length ?? 0 < 60 ? data?.latestMessage?.content : data?.latestMessage?.content?.slice(0, 60) + "..."}</Text>
         <TouchableOpacity style={styles.messageBtn} onPress={goToMessage}>
           <Ionicons name="chatbox-outline" size={40} color="orange" style={styles.messageIcon} />
         </TouchableOpacity>

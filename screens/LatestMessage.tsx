@@ -59,7 +59,7 @@ export default function LatestMessage({ navigation }: NavigationProp): React.JSX
             <Loading />
             :
             currentGroups?.data?.length ? currentGroups?.data.slice(0, 2).map((group, i) => (
-              <MessageSwipe length={group?.latestMessage?.length ?? 0} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={group} onRemove={removeMessage} key={i} />
+              <MessageSwipe length={group?.latestMessage?.content?.length ?? 0} rotate={i % 2 == 0 ? "-10deg" : "10deg"} data={group} onRemove={removeMessage} key={i} />
             )) :
               <MessageSwipe length={currentGroups?.data?.length ?? 0} rotate="0deg" data={currentGroups?.data && currentGroups?.data[0]} onRemove={removeMessage} />
 

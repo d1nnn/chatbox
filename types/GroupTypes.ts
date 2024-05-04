@@ -1,3 +1,4 @@
+import { MessageType } from "./MessageTypes"
 
 export type GroupType = {
   id?: string,
@@ -6,7 +7,7 @@ export type GroupType = {
   messages?: string[],
   users?: string[],
   photoUrl?: string,
-  latestMessage?: string,
+  latestMessage?: MessageType,
   isRead?: boolean
 }
 

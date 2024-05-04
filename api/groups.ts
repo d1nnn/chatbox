@@ -11,6 +11,7 @@ import { UserAction } from "../constants/user";
 import { v4 as uuidv4 } from 'uuid'
 import { addMessage } from "./messages";
 import "react-native-get-random-values"
+import { MessageType } from "../types/MessageTypes";
 
 export type DispatchOptions = {
   [key: string]: Dispatch<any>
@@ -87,7 +88,7 @@ export async function fetchGroups(
       }
       let messageDate = new Date(messageResult?.createdAt.toDate())
 
-      groupResult.latestMessage = messageResult?.content
+      groupResult.latestMessage = messageResult as MessageType
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
       const unreadGroup = userResult?.unread?.find(u => u.groupid === groupResult.id)
       groupResult.isRead = unreadGroup?.isRead
@@ -100,8 +101,10 @@ export async function fetchGroups(
     })
 
     groupList = await Promise.all(futureGroup)
+    let newGroupList = groupList.sort((a: any, b: any) => (b?.latestMessage?.createdAt as any) - (a?.latestMessage?.createdAt as any))
+    console.log("newGroupList", newGroupList)
     if (dispatchGroups) {
-      dispatchGroups({ type: GroupAction.FETCH, payload: groupList })
+      dispatchGroups({ type: GroupAction.FETCH, payload: newGroupList })
     }
   })
 
@@ -145,7 +148,7 @@ export async function fetchUnreadGroups(userid: string, dispatchOptions: Dispatc
       }
       let messageDate = new Date(messageResult?.createdAt.toDate())
 
-      groupResult.latestMessage = messageResult?.content
+      groupResult.latestMessage = messageResult as MessageType
       groupResult.time = ConvertDateToString(messageDate).slice(0, 5)
       groupResult.isRead = unreadGroup?.isRead
       groupResult.groupName = await getGroupName(userid, groupResult)

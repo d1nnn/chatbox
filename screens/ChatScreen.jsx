@@ -59,7 +59,7 @@ const ChatScreen = ({ navigation }) => {
           <ProfileImage uri={item?.photoUrl + ''} />
           <ListItem.Content>
             <ListItem.Title style={{ color: 'orange', fontWeight: "700" }}>{item?.groupName}</ListItem.Title>
-            <ListItem.Subtitle style={{ color: 'white' }}>{item?.latestMessage}</ListItem.Subtitle>
+            <ListItem.Subtitle style={{ color: 'white' }}>{item?.latestMessage?.content}</ListItem.Subtitle>
           </ListItem.Content>
           <ListItem.Content>
             <ListItem.Title style={{ color: 'white', marginLeft: 'auto' }}>{item?.time}</ListItem.Title>
